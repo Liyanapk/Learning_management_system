@@ -6,14 +6,16 @@ import mongoose from 'mongoose'
 
 
 export const dbconnect = async()=>{
+    
     try {
-        const connect=await mongoose.connect(process.env.MONGO_URL) 
+        
+        const connect=await mongoose.connect (process.env.MONGO_URL) 
         console.log(`database is connected ${connect.connection.host}`);
         
         
     } catch (error) {
         console.log(error);
-        process.exist(1)
+        process.exit(1)
         
     }
 }
