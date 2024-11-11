@@ -34,25 +34,25 @@ const testLectureSchema = new  mongoose.Schema( {
 
     subject : {
         type : Schema.Types.objectId,
-        ref : 'subject',
+        ref : 'Subject',
         required: true,
     },
 
     student : {
         type : Schema.Types.objectId,
-        ref : 'student',
+        ref : 'Student',
         required: true,
     },
 
     teacher : {
         type : Schema.Types.objectId,
-        ref : 'teacher',
+        ref : 'Teacher',
         required: true,
     },
 
     batch : {
         type : Schema.Types.objectId,
-        ref : 'batch',
+        ref : 'Batch',
         required: true,
     }
 

@@ -7,7 +7,7 @@ const router=express.Router()
 
 router.post('/addadmin' ,upload.single('pic') ,AddAdmin)
 router.get('/admin/:first_name/:second_name',findAdmin)
-router.get('/admin/findById/:id', findById);
+router.get('/admin/id/:id', findById);
 router.patch( '/admin/updateadmin/:id',upload.single('pic'),findAndUpdate)
 router.delete('/admin/delete/:id',finddelete)
 

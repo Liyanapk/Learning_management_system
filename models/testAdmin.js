@@ -6,35 +6,35 @@ import mongoose from 'mongoose'
 const testAdminSchema = new mongoose.Schema ({
     first_name :{
         type : String,
-        required : true
+        required : true,
     },
     last_name :{
         type : String,
-        required : true
+        required : true,
     },
     email :{
         type : String,
-        required : true
+        required : true,
     },
     age :{
         type : Number,
-        required : true
+        required : true,
     },
     phone_number :{
         type : Number,
-        required : true
+        required : true,
     },
     profile_pic :{
         type : String,
-        default : null,
+        required : true,
     },
     status :{
         type : Boolean,
-        required : true
+        required : true,
     },
     password :{
         type : String,
-        required : true
+        required : true,
     },
 
 })

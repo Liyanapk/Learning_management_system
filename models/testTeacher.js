@@ -56,14 +56,14 @@ const testTeacherSchema = new mongoose.Schema ( {
         required : true,
     },
 
-    subject : {
-        type : Schema.Types.objectId,
-        ref : 'subject',
+    subject: {
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'Subject', 
         required: true,
-    }
+    },
 
 })
 
 const Teacher = mongoose.model ('Teacher' , testTeacherSchema )
 
-export default Teacher
+export default Teacher;

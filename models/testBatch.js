@@ -9,7 +9,7 @@ batch_name : {
 },
 
 teacher_id : {
-    type : string,
+    type : String,
     unique :true,
     required : true,
 },

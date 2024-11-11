@@ -47,14 +47,9 @@ const testStudentSchema = new mongoose.Schema ({
     },
 
     student_id : {
-        type : string,
+        type : String,
         unique :true,
         required : true,
-    },
-
-    department : {
-        type : String,
-        required:true,
     },
 
     status : {
@@ -68,8 +63,8 @@ const testStudentSchema = new mongoose.Schema ({
     },
 
     batch : {
-        type : Schema.Types.objectId,
-        ref : 'batch',
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'Batch', 
         required: true,
     }
 

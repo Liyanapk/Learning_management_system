@@ -3,7 +3,7 @@ import mongoose from 'mongoose'
 
 const testSubjectSchema = new mongoose.Schema ( {
 
-subject_nmae : {
+subject_name : {
     type : String,
     required : true,
 
