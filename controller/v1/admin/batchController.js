@@ -1,14 +1,14 @@
-import Batch from "../../models/testBatch.js";
+import Batch from "../../../models/batch.js";
 
 
 //add batch
 
-export const AddBatch = async ( req, res, next ) => {
+export const addBatch = async ( req, res, next ) => {
     try {
-      const { batch_name, teacher_id, } = req.body;
+      const { batch_name, teacher_incharge, } = req.body;
       console.log(req.body);
   
-      if (!batch_name || !teacher_id) {
+      if (!batch_name || !teacher_incharge) {
         return res.status(400).json( { message: "Batch name and teacher id is required" } );
       }
   
@@ -28,18 +28,13 @@ export const AddBatch = async ( req, res, next ) => {
   
 //find batch
 
-  export const findBatch = async( req, res, next) =>{
+  export const listBatch = async( req, res, next) =>{
 
     try {
-        const { batch_name } = req.params;
-        const batch = await Batch.find( { batch_name } );
+    
+        const batch = await Batch.find();
 
-        if (batch.length === 0) {
-
-            return res.status(404).json({ message: 'batch not found' });
-        }
-
-        res.status(200).json({ message: ` founded ${batch_name} successfully`, data: batch });
+        res.status(200).json( batch );
       
 
     } catch (error) {
@@ -55,7 +50,7 @@ export const AddBatch = async ( req, res, next ) => {
 
 
 
-export const findBatchById = async( req, res, next) =>{
+export const findBatch = async( req, res, next) =>{
 
     try {
         const { id } = req.params;
@@ -78,7 +73,7 @@ export const findBatchById = async( req, res, next) =>{
 //findOneAddUpdate
 
 
-export const findAndUpdateBatch = async (req, res, next) =>{
+export const updateBatchDetailes = async (req, res, next) =>{
 
 
     

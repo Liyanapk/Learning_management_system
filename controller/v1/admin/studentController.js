@@ -1,5 +1,5 @@
 
-import Student from "../../models/testStudent.js";
+import Student from "../../../models/student.js";
 
 
 
@@ -8,16 +8,16 @@ import Student from "../../models/testStudent.js";
 
 
 
-export const Addstudent = async ( req, res, next ) => {
+export const addStudent = async ( req, res, next ) => {
 
     try {
-        const { first_name, last_name, age, email, phone_number, profile_pic, gender, dob, student_id, status, password, batch } = req.body ;
+        const { first_name, last_name, email, phone, profile_pic, gender, dob, student_id, status, password, batch } = req.body ;
     
         const profilePicturePath = req.file.path.slice(8);  
   
       try {
         const newStudent = new Student(
-            {first_name, last_name, age, email, phone_number, profile_pic :profilePicturePath, gender, dob, student_id, status, password, batch } 
+            {first_name, last_name, email, phone, profile_pic:profilePicturePath, gender, dob, student_id, status, password, batch } 
          );
     
         await newStudent.save();
@@ -41,18 +41,12 @@ export const Addstudent = async ( req, res, next ) => {
 //find
 
 
-export const findstudent = async( req, res, next) =>{
+export const listStudent = async( req, res, next) =>{
 
     try {
-        const { first_name, second_name } = req.params;
-        const student = await Student.find( { first_name, last_name: second_name } );
+        const student = await Student.find();
 
-        if (student.length === 0) {
-
-            return res.status(404).json({ message: 'student not found' });
-        }
-
-        res.status(200).json({ message: `${first_name} ${second_name} is found`, data: student });
+        res.status(200).json( student );
       
 
     } catch (error) {
@@ -65,7 +59,7 @@ export const findstudent = async( req, res, next) =>{
 
 //find by id
 
-export const findStudentById = async( req, res, next) =>{
+export const findStudent = async( req, res, next) =>{
 
     try {
         const { id } = req.params;
@@ -89,7 +83,7 @@ export const findStudentById = async( req, res, next) =>{
 //findOneAddUpdate
 
 
-export const findAndUpdateStudent = async (req, res, next) =>{
+export const updateStudentDetailes = async (req, res, next) =>{
 
 
     

@@ -1,11 +1,11 @@
 import express from 'express';
 import dotenv from "dotenv";
-import adminrouter from './routes/v1/testAdmin.js'
-import teacherrouter from './routes/v1/testTeacher.js'
-import subjectrouter from './routes/v1/testSubject.js'
-import studentrouter from './routes/v1/testStudent.js'
-import batchrouter from './routes/v1/testBatch.js'
-import lecturerouter from './routes/v1/testLecture.js'
+import adminrouter from './routes/v1/admin/adminRoutes.js'
+import teacherrouter from './routes/v1/admin/teacherRoutes.js'
+import subjectrouter from './routes/v1/admin/subjectRoutes.js'
+import studentrouter from './routes/v1/admin/studentRoutes.js'
+import batchrouter from './routes/v1/admin/batchRoutes.js'
+import lecturerouter from './routes/v1/admin/lectureRoutes.js'
 import { dbconnect } from './configs/dbconfig.js';
 
 
@@ -16,12 +16,12 @@ const PORT = process.env.PORT || 4001
 
 
 app.use (express.json())
-app.use('/',adminrouter)
-app.use('/',teacherrouter)
-app.use('/',subjectrouter)
-app.use('/',studentrouter)
-app.use('/',batchrouter)
-app.use('/',lecturerouter)
+app.use('/api/v1/admin',adminrouter)
+app.use('/api/v1/teacher',teacherrouter)
+app.use('/api/v1/subject',subjectrouter)
+app.use('/api/v1/student',studentrouter)
+app.use('/api/v1/batch',batchrouter)
+app.use('/api/v1/lecture',lecturerouter)
 dbconnect()
 
 

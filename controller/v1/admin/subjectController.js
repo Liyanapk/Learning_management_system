@@ -1,8 +1,9 @@
-import Subject from "../../models/testSubject.js";
+import Subject from "../../../models/subject.js";
 
 // Add subject
 
-export const AddSubject = async ( req, res, next ) => {
+
+export const addSubject = async ( req, res, next ) => {
   try {
     const { subject_name } = req.body;
     console.log(req.body);
@@ -30,18 +31,13 @@ export const AddSubject = async ( req, res, next ) => {
 //find
 
 
-export const findsubject = async( req, res, next) =>{
+export const listSubject = async( req, res, next) =>{
 
     try {
-        const { subject_name } = req.params;
-        const subject = await Subject.find( { subject_name } );
+     
+        const subject = await Subject.find();
 
-        if (subject.length === 0) {
-
-            return res.status(404).json({ message: 'subject not found' });
-        }
-
-        res.status(200).json({ message: ` subject is ${subject_name} `, data: subject });
+        res.status(200).json( subject );
       
 
     } catch (error) {
@@ -55,7 +51,7 @@ export const findsubject = async( req, res, next) =>{
 
 //find by id
 
-export const findSubjectById = async( req, res, next) =>{
+export const findSubject = async( req, res, next) =>{
 
     try {
         const { id } = req.params;
@@ -80,7 +76,7 @@ export const findSubjectById = async( req, res, next) =>{
 //findOneAddUpdate
 
 
-export const findAndUpdatesubject = async (req, res, next) =>{
+export const updatesubjectDetailes = async (req, res, next) =>{
 
 
     

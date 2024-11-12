@@ -1,4 +1,4 @@
-import Teacher from "../../models/testTeacher.js";
+import Teacher from "../../../models/teacher.js";
 
 
 
@@ -6,16 +6,16 @@ import Teacher from "../../models/testTeacher.js";
 
 
 
-export const Addteacher = async ( req, res, next ) => {
+export const addTeacher = async ( req, res, next ) => {
 
     try {
-        const { first_name, last_name, age, email, phone_number, profile_pic, gender, department, status, password, subject } = req.body ;
+        const { first_name, last_name, dob, email, phone, profile_pic, gender, status, password, subject } = req.body ;
     
         const profilePicturePath = req.file.path.slice(8);  
   
       try {
         const newTeacher = new Teacher(
-            { first_name, last_name, age, email, phone_number, profile_pic :profilePicturePath , gender, department, status, password, subject } 
+            { first_name, last_name, dob, email, phone, profile_pic:profilePicturePath, gender, status, password, subject } 
          );
     
         await newTeacher.save();
@@ -39,18 +39,13 @@ export const Addteacher = async ( req, res, next ) => {
 
 
 
-  export const findteacher = async( req, res, next) =>{
+  export const listTeacher = async( req, res, next) =>{
 
     try {
-        const { first_name, second_name } = req.params;
-        const teacher = await Teacher.find( { first_name, last_name: second_name } );
 
-        if (teacher.length === 0) {
+        const teacher = await Teacher.find();
 
-            return res.status(404).json({ message: 'teacher not found' });
-        }
-
-        res.status(200).json({ message: `${first_name} ${second_name} is found`, data: teacher });
+        res.status(200).json( teacher );
       
 
     } catch (error) {
@@ -64,7 +59,7 @@ export const Addteacher = async ( req, res, next ) => {
 
 //find by id
 
-export const findTeacherById = async( req, res, next) =>{
+export const findTeacher = async( req, res, next) =>{
 
     try {
         const { id } = req.params;
@@ -90,7 +85,7 @@ export const findTeacherById = async( req, res, next) =>{
 //findOneAddUpdate
 
 
-export const findAndUpdateTeacher = async (req, res, next) =>{
+export const updateTeacherDetailes = async (req, res, next) =>{
 
 
     

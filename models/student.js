@@ -25,14 +25,19 @@ const testStudentSchema = new mongoose.Schema ({
         required : true,
     },
    
-    phone_number : {
-        type : Number,
-        required : true,
+    phone: {
+        type: Number,
+        required: true,
+        validate: {
+            validator: function(val) {
+                return /^\d{10}$/.test(val.toString());
+            },
+            message: "Phone number must be exactly 10 digits."
+        }
     },
-
     profile_pic : {
         type : String,
-        required : true,
+        default: null,
     },
 
     gender : {
@@ -66,7 +71,37 @@ const testStudentSchema = new mongoose.Schema ({
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'Batch', 
         required: true,
+    },
+
+
+    isDeleted: {
+
+        status: { 
+            type: Boolean ,
+            default:false
+        },
+
+        deleted_by: { 
+            type: mongoose.Schema.Types.ObjectId ,
+            ref: 'admin',
+            default: null
+        },
+
+        deleted_at: {
+            type: Date,
+            default: null
+        },
+
     }
+
+
+}, {
+
+    timestamps:true
+
+
+
+
 
 }) 
 

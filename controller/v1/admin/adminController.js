@@ -1,28 +1,74 @@
 
-import Admin from "../../models/testAdmin.js";
+import Admin from "../../../models/admin.js";
+import jwt from 'jsonwebtoken';
+
+const jwt_secret = process.env.JWT 
+
+//admin login
+
+
+export const adminLogin =async(req, res, next) =>{
+
+    try {
+
+
+        const { email, password } =req.body 
+        const admin = await Admin.findOne( { email })
+       const token =jwt.sign(
+        { id: admin._id , role: admin.role } , process.env.JWT 
+
+       )
+       res.status(200).json({message:"hai"},token)
+    } catch (error) {
+        res.status(500)
+
+        console.log(error);
+        
+    }
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 //add admin
 
-export const AddAdmin = async (req, res, next) => {
+export const addAdmin = async (req, res, next) => {
 
     try {
-      const { first_name, last_name, email, age, phone_number, profile_pic, status, password } = req.body;
-       const profilePicturePath = req.file.path.slice(8);  
-  
-      try {
+      const { first_name, last_name, email, dob, phone, status, password, role,age } = req.body;
+      let profilePicturePath
+
+      if(req.file){
+         profilePicturePath = req.file.path.slice(8);
+      } 
+       
         const newAdmin = new Admin(
-            { first_name, last_name, email, age, phone_number, profile_pic :profilePicturePath, status, password} 
+            { first_name, last_name, email, dob, phone, status, password, role, profile_pic:profilePicturePath,age} 
          );
-    
         await newAdmin.save();
 
         res.status(201).json( { message: 'admin created successfully', data: newAdmin } );
         
-      } catch (error) {
-        console.log(error);
-        
-      }
     }   catch (error) {
         console.log(error)
 
@@ -33,21 +79,15 @@ export const AddAdmin = async (req, res, next) => {
 
 
 
-  //find admin
+//   //find admin
 
   
-export const findAdmin = async( req, res, next) =>{
+export const listAdmin = async( req, res, next) =>{
 
     try {
-        const { first_name, second_name } = req.params;
-        const admin = await Admin.find({ first_name, last_name: second_name });
 
-        if (admin.length === 0) {
-
-            return res.status(404).json({ message: 'Admin not found' });
-        }
-
-        res.status(200).json({ message: `${first_name} ${second_name} is found`, data: admin });
+        const admin = await Admin.find();
+        res.status(200).json(admin);
       
 
     } catch (error) {
@@ -59,21 +99,23 @@ export const findAdmin = async( req, res, next) =>{
 
 //find by id
 
-export const findById = async( req, res, next) =>{
+export const getOneAdmin = async( req, res, next) =>{
 
-    try {
-        const { id } = req.params;
-        const admin = await Admin.findById (id);
-        
-        res.status(200).json( { message:`admin is found` , data : admin} )
-        
-       
-       
-    }   catch (error) {
-        next(new Error( "Error find admin: " + error.message ));
+    const { id } = req.params;
 
-        res.status(500).json( { message:`Internal server error!` } )
+    if (!id) {
+        res.status(400).json( { message:` ID error!` } )
     }
+
+        const admin = await Admin.findOne( {_id: id} );
+
+        if (!admin) {
+
+            res.status(404).json( { message:` ADMIN error!` } )
+        }else {
+
+            res.status(200).json( { message:`admin is found` , data : admin} )
+        }
 
 }
 
@@ -83,7 +125,7 @@ export const findById = async( req, res, next) =>{
 //findOneAddUpdate
 
 
-export const findAndUpdate = async (req, res, next) =>{
+export const updateAdminDetailes = async (req, res, next) =>{
 
 
     
@@ -122,11 +164,11 @@ export const findAndUpdate = async (req, res, next) =>{
 
 
 
-//findOneAndDelete
+// //findOneAndDelete
 
 
 
-export const finddelete = async ( req, res, next)=>{
+export const deleteAdmin = async ( req, res, next)=>{
     try {
         const {id} = req.params;
         const deleteOneAdmin = await Admin.findOneAndDelete(
