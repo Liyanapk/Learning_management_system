@@ -1,4 +1,5 @@
 import Subject from "../../../models/subject.js";
+import httpError from "../../../utils/httpError.js";
 
 // Add subject
 
@@ -9,7 +10,7 @@ export const addSubject = async ( req, res, next ) => {
     console.log(req.body);
 
     if (!subject_name) {
-      return res.status(400).json( { message: "Subject name is required" } );
+      return next(new httpError("subject name is required!",400))
     }
 
     const newSubject = new Subject({
@@ -20,8 +21,7 @@ export const addSubject = async ( req, res, next ) => {
     res.status(201).json( { message: "Subject created successfully", data: newSubject } );
 
   } catch (error) {
-    console.log(error);
-    next(new Error("Error creating subject: " + error.message));
+   return next(new httpError("error in creating subject!",500))
   }
 };
 
@@ -41,7 +41,7 @@ export const listSubject = async( req, res, next) =>{
       
 
     } catch (error) {
-        next(new Error("Error finding subject: " + error.message));
+        return next(newError("error finding subject",500))
     }
 
 }
@@ -62,9 +62,7 @@ export const findSubject = async( req, res, next) =>{
        
        
     }   catch (error) {
-        next(new Error( "Error find subject: " + error.message ));
-
-        res.status(500).json( { message:`Internal server error!` } )
+        return next(new httpError("inetrnal server error",500))
     }
 
 }
@@ -98,7 +96,7 @@ export const updatesubjectDetailes = async (req, res, next) =>{
 
         if (!updateSubject) {
 
-            res.status(400).json({ message:`subject not found` })
+            return next(new httpError("subject not found",404))
 
         } else {
 
@@ -106,9 +104,7 @@ export const updatesubjectDetailes = async (req, res, next) =>{
         }
 
     }   catch (error) {
-        next( new Error("Error : " + error.message) );
-
-        res.status(500).json({ message:`Internal server error!` })
+        return next(new httpError("subject not updated!",500))
     }
 }
 
@@ -127,13 +123,13 @@ export const deleteSubject = async ( req, res, next)=>{
 
         if ( !deleteOneSubject ) {
 
-            res.status(400).json({ message:`subject not find`, data:deleteOneSubject })
+            return next(new httpError("subject not found",400))
         }
 
             res.status(202).json({message:`subject deleted successfully` ,data:deleteOneSubject})
 
     }   catch (error) {
-        next(new Error( "error deleting subject :" + error.message ))
+        return next(new httpError("internal server error",500))
     }
 }
 

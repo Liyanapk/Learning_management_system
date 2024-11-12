@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import httpError from '../utils/httpError.js';
 import adminModel from '../models/admin.js';
 
-
+const secretKey = 'kgmkfmg4' 
 export const adminAuth = async (req, res, next) => {
 
     try {
@@ -15,8 +15,9 @@ export const adminAuth = async (req, res, next) => {
         }
 
         const token = authHeader.split(" ")[1];
-
-        jwt.verify(token, process.env.JWT, async (err, decoded) => {
+        
+        
+        jwt.verify(token, secretKey, async (err, decoded) => {
 
             if (err) {
 

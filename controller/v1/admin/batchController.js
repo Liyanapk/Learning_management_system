@@ -1,4 +1,5 @@
 import Batch from "../../../models/batch.js";
+import httpError from "../../../utils/httpError.js";
 
 
 //add batch
@@ -6,22 +7,29 @@ import Batch from "../../../models/batch.js";
 export const addBatch = async ( req, res, next ) => {
     try {
       const { batch_name, teacher_incharge, } = req.body;
-      console.log(req.body);
+      
   
       if (!batch_name || !teacher_incharge) {
-        return res.status(400).json( { message: "Batch name and teacher id is required" } );
+        return next(new httpError("Batch name and teacher id is required" ,400))
+      }
+       
+
+      const batchExists  = await Batch.findOne( { batch_name } )
+
+       if(batchExists){
+        return next(new httpError("Batch already exsist!",404))
       }
   
       const newBatch = new Batch({
-        batch_name, teacher_id,
+        batch_name, teacher_incharge,
       });
-      await newBatch.save();
+        await newBatch.save();
   
       res.status(201).json( { message: "Batch created successfully", data: newBatch } );
   
     } catch (error) {
-      console.log(error);
-      next(new Error("Error creating batch: " + error.message));
+        console.error("Error details:", error);
+        return next(new httpError("Error creating batch",500))
     }
   };
   
@@ -38,7 +46,7 @@ export const addBatch = async ( req, res, next ) => {
       
 
     } catch (error) {
-        next(new Error("Error finding batch: " + error.message));
+       return next(new httpError("Error finding batch",500))
     }
 
 }
@@ -54,6 +62,9 @@ export const findBatch = async( req, res, next) =>{
 
     try {
         const { id } = req.params;
+        if(!id){
+            return next(new httpError("Not found!",404))
+        }
         const batch = await Batch.findById (id);
         
         res.status(200).json( { message:`batch founded successfully` , data : batch} )
@@ -61,9 +72,9 @@ export const findBatch = async( req, res, next) =>{
        
        
     }   catch (error) {
-        next(new Error( "Error find batch: " + error.message ));
-
-        res.status(500).json( { message:`Internal server error!` } )
+        
+        return next (new httpError("Internal server error",500))
+ 
     }
 
 }
@@ -79,6 +90,9 @@ export const updateBatchDetailes = async (req, res, next) =>{
     
     try {
         const { id } = req.params;
+        if(!id){
+            return next(new httpError("Not found",400))
+        }
         const BatchData = {...req.body};
         
         if(req.file && req.file.path){
@@ -96,7 +110,7 @@ export const updateBatchDetailes = async (req, res, next) =>{
 
         if (!updateBatch) {
 
-            res.status(400).json({ message:`batch not found` })
+         return next(new httpError("Batch not found",404))
 
         } else {
 
@@ -104,9 +118,8 @@ export const updateBatchDetailes = async (req, res, next) =>{
         }
 
     }   catch (error) {
-        next( new Error("Error : " + error.message) );
-
-        res.status(500).json({ message:`Internal server error!` })
+        
+            return next(new httpError("internal server error"),500)
     }
 }
 
@@ -121,19 +134,23 @@ export const updateBatchDetailes = async (req, res, next) =>{
 export const deleteBatch = async ( req, res, next)=>{
     try {
         const { id } = req.params;
+
+        if(!id){
+            return next(new httpError("Not found",404))
+        }
         const deleteOneBatch = await Batch.findOneAndDelete(
             { _id: id }
         )
 
         if ( !deleteOneBatch ) {
 
-            res.status(400).json({ message:`batch not find`, data:deleteOneBatch })
+            return next(new httpError("No batch found",400))
         }
 
             res.status(202).json({ message:`batch deleted successfully` ,data:deleteOneBatch })
 
     }   catch (error) {
-        next(new Error( "error deleting batch :" + error.message ))
+        return next(new httpError("Error in deleting batch",500))
     }
 }
 

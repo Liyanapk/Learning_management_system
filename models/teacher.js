@@ -41,7 +41,7 @@ const testTeacherSchema = new mongoose.Schema ( {
     },
     profile_pic : {
         type : String,
-        required : true,
+        default:null,
     },
 
     gender : {
@@ -83,7 +83,7 @@ const testTeacherSchema = new mongoose.Schema ( {
 
         deleted_by: { 
             type: mongoose.Schema.Types.ObjectId ,
-            ref: 'admin',
+            ref: 'Admin',
             default: null
         },
 

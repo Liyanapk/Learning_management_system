@@ -1,6 +1,7 @@
 import express from 'express';
 import { addTeacher, deleteTeacher, updateTeacherDetailes, listTeacher, findTeacher } from '../../../controller/v1/admin/teacherController.js';
 import { upload } from '../../../middleware/multer/multer.js';
+import { adminAuth } from '../../../middleware/authCheck.js';
 const router=express.Router()
 
 

@@ -1,5 +1,6 @@
 import express from 'express';
 import { addSubject, deleteSubject, updatesubjectDetailes, listSubject, findSubject } from '../../../controller/v1/admin/subjectController.js';
+import { adminAuth } from '../../../middleware/authCheck.js';
 
 
 const router=express.Router()

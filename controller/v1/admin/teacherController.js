@@ -1,6 +1,6 @@
 import Teacher from "../../../models/teacher.js";
-
-
+import bcrypt from 'bcrypt'
+import httpError from "../../../utils/httpError.js";
 
 //create teacher
 
@@ -9,25 +9,45 @@ import Teacher from "../../../models/teacher.js";
 export const addTeacher = async ( req, res, next ) => {
 
     try {
-        const { first_name, last_name, dob, email, phone, profile_pic, gender, status, password, subject } = req.body ;
-    
-        const profilePicturePath = req.file.path.slice(8);  
+
+//age logic ( take age from dob )
+
+const calculateAge = (dob) => {
+    const today = new Date();
+    const birthDate = new Date(dob);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const month = today.getMonth();
+    const day = today.getDate();
   
-      try {
+    if (month < birthDate.getMonth() || (month === birthDate.getMonth() && day < birthDate.getDate())) {
+      age--;
+    }
+
+    return age;
+  };
+
+
+        const { first_name, last_name, dob, email, phone, gender, status, password, subject } = req.body ;
+    
+        let profilePicturePath 
+
+        if(req.file){
+            profilePicturePath = req.file.path.slice(8);
+        }  
+        const age = calculateAge(dob)
+        const hashedPassword = await bcrypt.hash(password, parseInt(process.env.SALT_VALUE));
+  
+      
         const newTeacher = new Teacher(
-            { first_name, last_name, dob, email, phone, profile_pic:profilePicturePath, gender, status, password, subject } 
+            { first_name, last_name, dob, email, phone, profile_pic:profilePicturePath, gender, status, password: hashedPassword, subject, age } 
          );
     
         await newTeacher.save();
         res.status(201).json ( { message: 'teacher created successfully', data: newTeacher } );
         
-      } catch (error) {
-        console.log ( error );
-        
-      }
+      
     } catch (error) {
-        console.log( error )
-      res.status(500).json( { message: 'Error creating teacher', error: error.message } );
+        return next(new httpError("error creating teacher",500))
     }
   };
 
@@ -49,7 +69,7 @@ export const addTeacher = async ( req, res, next ) => {
       
 
     } catch (error) {
-        next(new Error("Error finding teacher: " + error.message));
+       return next(new httpError("internal server error",500))
     }
 
 }
@@ -70,9 +90,7 @@ export const findTeacher = async( req, res, next) =>{
        
        
     }   catch (error) {
-        next(new Error( "Error find teacher: " + error.message ));
-
-        res.status(500).json( { message:`Internal server error!` } )
+        return next(new httpError("internal server error",500))
     }
 
 }
@@ -107,7 +125,7 @@ export const updateTeacherDetailes = async (req, res, next) =>{
 
         if (!updateTeacher) {
 
-            res.status(400).json({ message:`teacher not found` })
+            return next(new httpError("Teacher not found",400))
 
         } else {
 
@@ -117,7 +135,7 @@ export const updateTeacherDetailes = async (req, res, next) =>{
     }   catch (error) {
         next( new Error("Error : " + error.message) );
 
-        res.status(500).json({ message:`Internal server error!` })
+        return next(new httpError("internal server error",500))
     }
 }
 
@@ -137,12 +155,12 @@ export const deleteTeacher = async ( req, res, next)=>{
 
         if ( !deleteOneTeacher ) {
 
-            res.status(400).json({ message:`teacher not find`, data:deleteOneTeacher })
+            return next(new httpError("Teacher not found",400))
         }
 
             res.status(202).json({message:`teacher deleted successfully` ,data:deleteOneTeacher})
 
     }   catch (error) {
-        next(new Error( "error deleting teacher :" + error.message ))
+        return next(new httpError("internal server error",500))
     }
 }

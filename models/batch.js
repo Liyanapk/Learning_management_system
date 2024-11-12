@@ -11,7 +11,7 @@ batch_name : {
 teacher_incharge: {
 
     type: mongoose.Schema.Types.ObjectId, 
-    ref: 'teacher',                
+    ref: 'Teacher',                
     required: true
 
 },
@@ -25,7 +25,7 @@ isDeleted: {
 
     deleted_by: { 
         type: mongoose.Schema.Types.ObjectId ,
-        ref: 'admin',
+        ref: 'Admin',
         default: null
     },
 

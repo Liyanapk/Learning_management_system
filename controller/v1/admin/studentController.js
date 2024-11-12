@@ -1,7 +1,7 @@
 
 import Student from "../../../models/student.js";
 
-
+import httpError from "../../../utils/httpError.js";
 
 
 //create student
@@ -11,25 +11,45 @@ import Student from "../../../models/student.js";
 export const addStudent = async ( req, res, next ) => {
 
     try {
-        const { first_name, last_name, email, phone, profile_pic, gender, dob, student_id, status, password, batch } = req.body ;
-    
-        const profilePicturePath = req.file.path.slice(8);  
+
+
+//age logic ( take age from dob )
+
+const calculateAge = (dob) => {
+    const today = new Date();
+    const birthDate = new Date(dob);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const month = today.getMonth();
+    const day = today.getDate();
   
-      try {
+    if (month < birthDate.getMonth() || (month === birthDate.getMonth() && day < birthDate.getDate())) {
+      age--;
+    }
+
+    return age;
+  };
+
+
+        const { first_name, last_name, email, phone, gender, dob, student_id, status, password, batch } = req.body ;
+    
+        let profilePicturePath 
+
+        if(req.file){
+            profilePicturePath = req.file.path.slice(8);
+        }    
+        const age = calculateAge(dob)
+  
+     
         const newStudent = new Student(
-            {first_name, last_name, email, phone, profile_pic:profilePicturePath, gender, dob, student_id, status, password, batch } 
+            {first_name, last_name, email, phone, profile_pic:profilePicturePath, gender, dob, student_id, status, password, batch, age } 
          );
     
         await newStudent.save();
         res.status(201).json ( { message: 'student created successfully', data: newStudent } );
         
-      } catch (error) {
-        console.log ( error );
-        
-      }
+      
     } catch (error) {
-        console.log( error )
-      res.status(500).json( { message: 'Error creating student', error: error.message } );
+       return next(new httpError("error creating student",500))
     }
   };
 
@@ -50,7 +70,7 @@ export const listStudent = async( req, res, next) =>{
       
 
     } catch (error) {
-        next(new Error("Error finding student: " + error.message));
+        return next(new httpError("error finiding students",500))
     }
 
 }
@@ -70,9 +90,7 @@ export const findStudent = async( req, res, next) =>{
        
        
     }   catch (error) {
-        next(new Error( "Error find student: " + error.message ));
-
-        res.status(500).json( { message:`Internal server error!` } )
+        return next(new httpError("error finding students",500))
     }
 
 }
@@ -106,7 +124,7 @@ export const updateStudentDetailes = async (req, res, next) =>{
 
         if (!updateStudent) {
 
-            res.status(400).json({ message:`student not found` })
+           return next(new httpError("student not found",404))
 
         } else {
 
@@ -114,9 +132,7 @@ export const updateStudentDetailes = async (req, res, next) =>{
         }
 
     }   catch (error) {
-        next( new Error("Error : " + error.message) );
-
-        res.status(500).json({ message:`Internal server error!` })
+        return next(new httpError("internal server error",500))
     }
 }
 
@@ -137,12 +153,12 @@ export const deleteStudent = async ( req, res, next)=>{
 
         if ( !deleteOneStudent ) {
 
-            res.status(400).json({ message:`student not find`, data:deleteOneStudent })
+            return next(new httpError("student not found",404))
         }
 
             res.status(202).json({message:`student deleted successfully` ,data:deleteOneStudent})
 
     }   catch (error) {
-        next(new Error( "error deleting student :" + error.message ))
+        return next(new httpError("error deleting student",500))
     }
 }
