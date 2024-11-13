@@ -28,12 +28,7 @@ const testStudentSchema = new mongoose.Schema ({
     phone: {
         type: Number,
         required: true,
-        validate: {
-            validator: function(val) {
-                return /^\d{10}$/.test(val.toString());
-            },
-            message: "Phone number must be exactly 10 digits."
-        }
+        
     },
     profile_pic : {
         type : String,
@@ -74,7 +69,7 @@ const testStudentSchema = new mongoose.Schema ({
     },
 
 
-    isDeleted: {
+    is_deleted: {
 
         status: { 
             type: Boolean ,

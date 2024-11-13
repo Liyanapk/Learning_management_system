@@ -8,7 +8,7 @@ batch_name : {
     required : true,
 },
 
-teacher_incharge: {
+in_charge: {
 
     type: mongoose.Schema.Types.ObjectId, 
     ref: 'Teacher',                
@@ -16,7 +16,7 @@ teacher_incharge: {
 
 },
 
-isDeleted: {
+is_deleted: {
 
     status: { 
         type: Boolean ,

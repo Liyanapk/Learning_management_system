@@ -39,12 +39,6 @@ const testAdminSchema = new mongoose.Schema ({
     phone: {
         type: Number,
         required: true,
-        validate: {
-            validator: function(val) {
-                return /^\d{10}$/.test(val.toString());
-            },
-            message: "Phone number must be exactly 10 digits."
-        }
     },
 
     profile_pic :{
@@ -67,28 +61,22 @@ const testAdminSchema = new mongoose.Schema ({
 
     password: {
         type: String,
-        required: true,
-        validate: {
-            validator: function(val) {
-                return /^(?=.*[!@#$%^&*(),.?":{}|<>])[A-Za-z\d!@#$%^&*(),.?":{}|<>]{6,}$/.test(val);
-            },
-            message: "Password must be at least 6 characters long and include at least one special character"
-        }
+        required: true, 
     },
 
 
-    isDeleted: {
+    is_deleted: {
 
         status: { 
             type: Boolean ,
             default:false
         },
 
-        deleted_by: { 
-            type: mongoose.Schema.Types.ObjectId ,
-            ref: 'Admin',
-            default: null
-        },
+        // deleted_by: { 
+        //     type: mongoose.Schema.Types.ObjectId ,
+        //     ref: 'Admin',
+        //     default: null
+        // },
 
         deleted_at: {
             type: Date,

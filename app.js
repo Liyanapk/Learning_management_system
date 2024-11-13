@@ -7,7 +7,7 @@ import studentrouter from './routes/v1/admin/studentRoutes.js'
 import batchrouter from './routes/v1/admin/batchRoutes.js'
 import lecturerouter from './routes/v1/admin/lectureRoutes.js'
 import { dbconnect } from './configs/dbconfig.js';
-import { errorMiddleware } from './middleware/errorMiddleware.js';
+import { errorMiddleware, notFound } from './middleware/errorMiddleware.js';
 
 
 dotenv.config()
@@ -24,6 +24,7 @@ app.use('/api/v1/student',studentrouter)
 app.use('/api/v1/batch',batchrouter)
 app.use('/api/v1/lecture',lecturerouter)
 app.use(errorMiddleware)
+app.use(notFound)
 dbconnect()
 
 
