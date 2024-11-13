@@ -9,7 +9,7 @@ const router=express.Router()
 
 router.use(adminAuth)
 
-router.use(adminAuth)
+
 router.post('/', addBatch)
 router.get('/list',listBatch)
 router.get('/:id',findBatch)

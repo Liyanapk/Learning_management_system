@@ -53,7 +53,7 @@ const testStudentSchema = new mongoose.Schema ({
 
     student_id : {
         type : String,
-        unique :true,
+        // unique :true,
         required : true,
     },
 

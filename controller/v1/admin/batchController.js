@@ -6,11 +6,11 @@ import httpError from "../../../utils/httpError.js";
 
 export const addBatch = async ( req, res, next ) => {
     try {
-      const { batch_name, teacher_incharge, } = req.body;
-      
-  
-      if (!batch_name || !teacher_incharge) {
-        return next(new httpError("Batch name and teacher id is required" ,400))
+
+      const { batch_name, teacher_incharge } = req.body;
+
+      if(!batch_name || !teacher_incharge) {
+        return next(new httpError("Batch name and teacher incharge is required" ,400))
       }
        
 
@@ -20,15 +20,14 @@ export const addBatch = async ( req, res, next ) => {
         return next(new httpError("Batch already exsist!",404))
       }
   
-      const newBatch = new Batch({
-        batch_name, teacher_incharge,
-      });
+      const newBatch = new Batch({ batch_name, teacher_incharge });
         await newBatch.save();
   
-      res.status(201).json( { message: "Batch created successfully", data: newBatch } );
+      res.status(201).json(newBatch);
   
     } catch (error) {
-        console.error("Error details:", error);
+        console.log("error is :",error);
+        
         return next(new httpError("Error creating batch",500))
     }
   };

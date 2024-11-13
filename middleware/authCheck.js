@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import httpError from '../utils/httpError.js';
 import adminModel from '../models/admin.js';
 
-const secretKey = 'kgmkfmg4' 
+const secretKey = '5?#562@' 
 export const adminAuth = async (req, res, next) => {
 
     try {
@@ -20,7 +20,7 @@ export const adminAuth = async (req, res, next) => {
         jwt.verify(token, secretKey, async (err, decoded) => {
 
             if (err) {
-
+                console.error("Token verification error:", err);
                 return next(new httpError("Invalid or expired token", 401));
             }
 

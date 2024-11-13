@@ -56,26 +56,32 @@ export const addAdmin = async (req, res, next) => {
 
     try {
 
-       //age logic ( take age from dob )
-
-      const calculateAge = (dob) => {
-        const today = new Date();
-        const birthDate = new Date(dob);
-        let age = today.getFullYear() - birthDate.getFullYear();
-        const month = today.getMonth();
-        const day = today.getDate();
-      
-        if (month < birthDate.getMonth() || (month === birthDate.getMonth() && day < birthDate.getDate())) {
-          age--;
-        }
-
-        return age;
-      };
-       
+     
 
       //body feild
       const { first_name, last_name, email, dob, phone, status, password, role } = req.body;
        
+
+        //age logic ( take age from dob )
+
+        const calculateAge = (dob) => {
+            const today = new Date();
+            const birthDate = new Date(dob);
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const month = today.getMonth();
+            const day = today.getDate();
+          
+            if (month < birthDate.getMonth() || (month === birthDate.getMonth() && day < birthDate.getDate())) {
+              age--;
+            }
+    
+            return age;
+          };
+           
+
+
+
+
       //validation check
       if( !first_name || !last_name || !email || !dob || !phone || !status || !password || !role ){
         return next (new httpError("All credentials are Required!"))
@@ -85,16 +91,17 @@ export const addAdmin = async (req, res, next) => {
    
       const adminExsist = await Admin.findOne({ $or: [{ email }, { phone }] })
     
-      if (adminExsist) {
-          let errorMessage = adminExsist.email === email ? "An admin with this email already exists" : "An admin with this phone number already exists";
-          return next(new httpError(errorMessage, 407));
+      if (!adminExsist) {
+         
+          return next(new httpError("no admin exist!",404))
+        
       }
 
 
       //add admin detailes
      
 
-      const age = calculateAge(dob)
+      
 
       const hashedPassword = await bcrypt.hash(password, parseInt(process.env.SALT_VALUE));
 
@@ -105,7 +112,7 @@ export const addAdmin = async (req, res, next) => {
       } 
        
         const newAdmin = new Admin(
-            { first_name, last_name, email, dob, phone, status, password: hashedPassword, role, profile_pic:profilePicturePath, age} 
+            { first_name, last_name, email, dob, phone, status, password: hashedPassword, role, profile_pic:profilePicturePath, age:calculateAge(dob) } 
          );
 
         await newAdmin.save();
@@ -129,9 +136,10 @@ export const listAdmin = async( req, res, next) =>{
 
     try {
 
-        const admin = await Admin.find();
+        const admin = await Admin.find({ "isDeleted.status":false});
         res.status(200).json(admin);
-      
+
+        
 
     } catch (error) {
         return next (new httpError(" Server Error " ,500 ));
@@ -189,7 +197,7 @@ export const updateAdminDetailes = async (req, res, next) =>{
         if(req.file && req.file.path){
          AdminData.profile_pic = req.file.path.slice(8)
         }
-
+ 
        
          const updateAdmin = await Admin.findOneAndUpdate (
             { _id: id },
