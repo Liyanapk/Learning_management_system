@@ -179,19 +179,16 @@ export const findStudent = async( req, res, next) =>{
 export const updateStudentDetailes = async (req, res, next) =>{
 
 
-    
     try {
-
         const { id } = req.params;
-        
-        if(!id){
-            return next(new httpError("no id found",400))
+
+        if (!id) {
+            return next(new httpError("No ID found", 400));
         }
 
+        const { first_name, last_name, email, phone, gender, dob, status, password, batch } = req.body;
 
-         const {first_name, last_name, email, phone, gender, dob, status, password, batch} =req.body;
         //age logic
-
         const calculateAge = (dob) => {
             const today = new Date();
             const birthDate = new Date(dob);
@@ -203,115 +200,67 @@ export const updateStudentDetailes = async (req, res, next) =>{
             }
             return age;
         };
+        
+        //updated value
+        const updateData = { first_name, last_name, email, phone, gender, dob, status, batch };
 
-
-
-         
-        //email
-
+        //  email
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if ( req.body.email && !emailRegex.test(email)) {
+        if (req.body.email && !emailRegex.test(email)) {
             return next(new httpError("Invalid email format!", 400));
-            
-        }
-        
-        
-
-        //password
-
-        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
-        if (!passwordRegex.test(password)) {
-            return next(new httpError("Password must be at least 6 characters long, include a letter, a number, and a special character.", 400));
         }
 
-        //phone 
-
+        //  phone
         const phoneRegex = /^\d{10}$/;
-        if ( req.body.phone && !phoneRegex.test(phone)) {
+        if (req.body.phone && !phoneRegex.test(phone)) {
             return next(new httpError("Phone number must be a 10-digit number.", 400));
         }
-       //dob
-        if( req.body.dob ) {
-            updateData.age = calculateAge(dob)
-        }
-        
-        //gender
-        if( req.body.gender){
-            updateData.gender =gender;
-        }
-        //status
-        if( req.body.status){
-            updateData.status =status;
-        }
-       
-        //batch
-        if( req.body.batch){
-            updateData.batch =batch;
+
+        // validate and hash password 
+        if (req.body.password) {
+            const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
+            if (!passwordRegex.test(password)) {
+                return next(new httpError("Password must be at least 6 characters long, include a letter, a number, and a special character.", 400));
+            }
+
+            const saltRounds = process.env.SALT_VALUE ? parseInt(process.env.SALT_VALUE) : 10;
+            const hashedPassword = await bcrypt.hash(password, saltRounds);
+            updateData.password = hashedPassword;
         }
 
-
-
-        // Check if student already exists
-        const studentExsist = await Student.findOne( {$or: [ { email }, { phone } ], _id: { $ne: id } } )
-
-        if (studentExsist) {
-            return next(new httpError("student with this email or phone already exists!", 400));
+        // set age 
+        if (req.body.dob) {
+            updateData.age = calculateAge(dob);
         }
 
-        //hashed password
-
-        const hashedPassword = await bcrypt.hash(password, parseInt(process.env.SALT_VALUE));
-
-        //picture path
-        let profilePicturePath;
+        // set profile picture path 
         if (req.file) {
-            profilePicturePath = req.file.path.slice(8);
+            updateData.profile_pic = req.file.path.slice(8);
         }
-  
-     
-        const updateData = {
-            first_name,
-            last_name,
-            email,
-            phone,
-            gender,
-            dob,
-            status,
-            password: hashedPassword,
-            batch,
-            profile_pic: profilePicturePath,
-            age: calculateAge(dob),
-          }; 
 
-    
-       
-       
-         const updateStudent = await Student.findOneAndUpdate (
+        // Checking  student with email or phone already exists
+        const studentExist = await Student.findOne({ $or: [{ email }, { phone }], _id: { $ne: id } });
+        if (studentExist) {
+            return next(new httpError("A student with this email or phone already exists!", 400));
+        }
+
+        const updateStudent = await Student.findOneAndUpdate(
             { _id: id },
             { $set: updateData },
             { new: true, runValidators: true }
         );
 
-
-
         if (!updateStudent) {
-            console.log("err",error)
-           return next(new httpError("student not found",404))
-
+            return next(new httpError("Student not found", 404));
         } else {
-
-
-            res.status(200).json({ message:`student updated successfully` , data : updateStudent })
+            res.status(200).json({ message: `Student updated successfully`, data: updateStudent });
         }
 
-    }   catch (error) {
-        console.log("err",error)
-        return next(new httpError("internal server error",500))
+    } catch (error) {
+        console.log("err", error);
+        return next(new httpError("Internal server error", 500));
     }
-}
-
-
-
+};
 
 
 //findOneAndDelete

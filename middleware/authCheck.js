@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import httpError from '../utils/httpError.js';
-import adminModel from '../models/admin.js';
+import Admin from '../models/admin.js';
 
 const secretKey = '5?#562@' 
 export const adminAuth = async (req, res, next) => {
@@ -24,13 +24,13 @@ export const adminAuth = async (req, res, next) => {
                 return next(new httpError("Invalid or expired token", 401));
             }
 
-            req.admin = decoded;
+            req.Admin = decoded;
             console.log(decoded);
             
 
             try {
 
-                const validAdmin = await adminModel.findOne({ _id: decoded.id, "isDeleted.status": false, status: "active" });
+                const validAdmin = await Admin.findOne({ _id: decoded.id, "isDeleted.status": false, status: "active" });
 
                 if (!validAdmin) {
                     return next(new httpError("Unauthorized - Admin not found or inactive", 404));

@@ -16,24 +16,28 @@ dotenv.config()
 const app = express()
 const PORT = process.env.PORT || 4001
 
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
-
+dbconnect()
 
 app.use (express.json())
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
+
+app.use(express.static('uploads'));
+
 app.use('/api/v1/admin',adminrouter)
 app.use('/api/v1/teacher',teacherrouter)
 app.use('/api/v1/subject',subjectrouter)
 app.use('/api/v1/student',studentrouter)
 app.use('/api/v1/batch',batchrouter)
 app.use('/api/v1/lecture',lecturerouter)
-app.use(errorMiddleware)
+
 app.use(notFound)
-dbconnect()
+app.use(errorMiddleware)
 
 
   
 
-app.use(express.static('uploads'));
+
 
 app.listen (PORT, ()=>{
     console.log(`Server is running on http://localhost:${PORT}`);

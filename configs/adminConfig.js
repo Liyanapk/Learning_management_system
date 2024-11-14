@@ -1,7 +1,6 @@
-export const adminrole = {
-     
-    ADMIN :'admin',
-    SUPER_ADMIN :'super_admin'
+export const adminRoleObj = {
+    ADMIN: 'admin',
+    SUPERADMIN: 'superadmin'
 }
 
-export const adminRoleArray = [ adminrole.ADMIN, adminrole.SUPER_ADMIN ]
+export const adminRoleArr = [adminRoleObj.ADMIN, adminRoleObj.SUPERADMIN]

@@ -41,7 +41,7 @@ export const listSubject = async( req, res, next) =>{
       
 
     } catch (error) {
-        return next(newError("error finding subject",500))
+        return next(new httpError("error finding subject",500))
     }
 
 }

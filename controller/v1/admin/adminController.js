@@ -2,9 +2,11 @@
 import Admin from "../../../models/admin.js";
 import jwt from 'jsonwebtoken';
 import httpError from "../../../utils/httpError.js";
+import { adminRoleObj } from '../../../configs/adminConfig.js'
 import bcrypt from 'bcrypt'
 
 const JWT_SECRET = process.env.JWT_SECRET || "5?#562@";
+const superadmin = adminRoleObj.SUPERADMIN
 
 //admin login
 
@@ -14,6 +16,7 @@ export const adminLogin = async( req, res, next ) =>{
            try {
 
             const { email,password }= req.body
+            console.log(req.body); // Add this before the validation check
 
             if( !email || !password ) {
 
@@ -37,7 +40,7 @@ export const adminLogin = async( req, res, next ) =>{
 
             //jwt token 
 
-            const token = jwt.sign({ id: admin.id, role: admin.role }, JWT_SECRET, { expiresIn: '24h' });
+            const token = jwt.sign({ id: admin.id, role: Admin.role }, JWT_SECRET, { expiresIn: '24h' });
 
             res.json({message: "Login successfull" , token})
 
@@ -56,6 +59,10 @@ export const addAdmin = async (req, res, next) => {
 
          try {
 
+            if (req.user.role !== superadmin) {
+
+                return next(new httpError("Only Super Admin can Create Admins", 403))
+            }
 
         const { first_name, last_name, email, dob, phone, status, password, role } = req.body;
          
@@ -151,7 +158,10 @@ export const listAdmin = async( req, res, next) =>{
 
     try {
           //get all (not get soft deleted)
-        const admin = await Admin.find({ "isDeleted.status":false});
+        const admin = await Admin.find();
+        if(!admin){
+            return next (new httpError(" no admin " ,400 ));
+        }
         res.status(200).json(admin);
 
         
@@ -167,7 +177,7 @@ export const listAdmin = async( req, res, next) =>{
 
 export const getOneAdmin = async( req, res, next) =>{
 
-    try {
+    try { 
         const { id } = req.params;
 
     if (!id) {
@@ -203,6 +213,13 @@ export const updateAdminDetailes = async (req, res, next) =>{
 
     
     try {
+
+
+        if (req.user.role !== superadmin) {
+
+            return next(new httpError("Only Super Admin can Update Admins or Super admins", 403))
+        }
+
         const { id } = req.params;
 
         if (!id) {
@@ -224,29 +241,52 @@ export const updateAdminDetailes = async (req, res, next) =>{
             return age;
         };
 
-        // email 
-        const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
-        if ( !emailRegex.test(email)) {
-            return next(new httpError("Invalid email format!", 400));
-        }
 
-        // password 
-        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
-        if (!passwordRegex.test(password)) {
-            return next(new httpError("Password must be at least 6 characters long, include a letter, a number, and a special character.", 400));
-        }
 
-        // phone 
-        const phoneRegex = /^\d{10}$/;
-        if (!phoneRegex.test(phone)) {
-            return next(new httpError("Phone number must be a 10-digit number.", 400));
-        }
+        const updateData = {
+            first_name,
+            last_name,
+            email,
+            dob,
+            phone,
+            status,
+            role,
+        };
 
-        //  profile pic path
-        let profilePicturePath;
-        if (req.file) {
-            profilePicturePath = req.file.path.slice(8);
-        }
+  //  email
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (req.body.email && !emailRegex.test(email)) {
+      return next(new httpError("Invalid email format!", 400));
+  }
+
+  //  phone
+  const phoneRegex = /^\d{10}$/;
+  if (req.body.phone && !phoneRegex.test(phone)) {
+      return next(new httpError("Phone number must be a 10-digit number.", 400));
+  }
+
+  // validate and hash password 
+  if (req.body.password) {
+      const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
+      if (!passwordRegex.test(password)) {
+          return next(new httpError("Password must be at least 6 characters long, include a letter, a number, and a special character.", 400));
+      }
+
+      const saltRounds = process.env.SALT_VALUE ? parseInt(process.env.SALT_VALUE) : 10;
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+      updateData.password = hashedPassword;
+  }
+
+  // set age 
+  if (req.body.dob) {
+      updateData.age = calculateAge(dob);
+  }
+
+  // set profile picture path 
+  if (req.file) {
+      updateData.profile_pic = req.file.path.slice(8);
+  }
+
 
         //check if the admin with same email or password is there (exclude the updating admin ID)
         const existingAdmin = await Admin.findOne( {$or: [ { email }, { phone } ], _id: { $ne: id } } )
@@ -254,27 +294,15 @@ export const updateAdminDetailes = async (req, res, next) =>{
            return next(new httpError("admin with this email and phone already exist",300))
         }
 
-        // hashed password
-        const hashedPassword = await bcrypt.hash(password, parseInt(process.env.SALT_VALUE));
+     
  
        
-        const AdminData = {
-            first_name,
-            last_name,
-            email,
-            dob,
-            phone,
-            status,
-            password: hashedPassword,
-            role,
-            profile_pic: profilePicturePath,
-            age: calculateAge(dob),
-        };
+       
 
         // detailes of updates admin
         const updateAdmin = await Admin.findOneAndUpdate(
             { _id: id },
-            { $set: AdminData },
+            { $set: updateData },
             { new: true, runValidators: true }
         );
 
@@ -299,10 +327,23 @@ export const updateAdminDetailes = async (req, res, next) =>{
 
 export const deleteAdmin = async ( req, res, next)=>{
     try {
+
+        if (req.user.role !== superadmin) {
+
+            return next(new httpError("Only Super Admin can delete admins or superadmins", 403));
+        }
+
         const {id} = req.params;
 
         if (!id) {
             return next (new httpError("Error finding admin",400))
+        }
+
+        const adminID = req.user?.id
+
+        if (!adminID) {
+
+            return next(new httpError("Unauthorized action", 403));
         }
 
         //soft delete
