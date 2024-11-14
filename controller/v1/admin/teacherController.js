@@ -10,37 +10,81 @@ export const addTeacher = async ( req, res, next ) => {
 
     try {
 
-//age logic ( take age from dob )
 
-const calculateAge = (dob) => {
+const {first_name, last_name, dob, email, phone, gender, status, password, subject } =req.body
+
+    //age logic
+
+      const calculateAge = (dob) => {
     const today = new Date();
     const birthDate = new Date(dob);
     let age = today.getFullYear() - birthDate.getFullYear();
     const month = today.getMonth();
     const day = today.getDate();
-  
     if (month < birthDate.getMonth() || (month === birthDate.getMonth() && day < birthDate.getDate())) {
-      age--;
+        age--;
+    }
+    return age;
+    };
+
+
+
+ 
+    //email
+
+     const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+     if (!emailRegex.test(email)) {
+    return next(new httpError("Invalid email format!", 400));
+     }
+
+    //password
+
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
+    if (!passwordRegex.test(password)) {
+    return next(new httpError("Password must be at least 8 characters long, include a letter, a number, and a special character.", 400));
     }
 
-    return age;
-  };
+    //phone 
+
+    const phoneRegex = /^\d{10}$/;
+     if (!phoneRegex.test(phone)) {
+    return next(new httpError("Phone number must be a 10-digit number.", 400));
+    }
 
 
-        const { first_name, last_name, dob, email, phone, gender, status, password, subject } = req.body ;
-    
-        let profilePicturePath 
 
-        if(req.file){
-            profilePicturePath = req.file.path.slice(8);
-        }  
-        const age = calculateAge(dob)
-        const hashedPassword = await bcrypt.hash(password, parseInt(process.env.SALT_VALUE));
+    // Check if teacher already exists
+    const teacher = await Teacher.findOne( {$or: [ { email }, { phone } ] } )
+
+    if (teacher) {
+    return next(new httpError("teacher with this email or phone already exists!", 400));
+    }
+
+    //hashed password
+
+    const hashedPassword = await bcrypt.hash(password, parseInt(process.env.SALT_VALUE));
+
+    //picture path
+    let profilePicturePath;
+    if (req.file) {
+    profilePicturePath = req.file.path.slice(8);   
+    }
+
   
       
-        const newTeacher = new Teacher(
-            { first_name, last_name, dob, email, phone, profile_pic:profilePicturePath, gender, status, password: hashedPassword, subject, age } 
-         );
+        const newTeacher = new Teacher({
+          first_name,
+          last_name,
+          dob,
+          email,
+          phone,
+          profile_pic: profilePicturePath,
+          gender,
+          status,
+          password: hashedPassword,
+          subject,
+          age :calculateAge(dob),
+        });
     
         await newTeacher.save();
         res.status(201).json ( { message: 'teacher created successfully', data: newTeacher } );
@@ -63,7 +107,7 @@ const calculateAge = (dob) => {
 
     try {
 
-        const teacher = await Teacher.find();
+        const teacher = await Teacher.find({"is_deleted.status":false});
 
         res.status(200).json( teacher );
       
@@ -83,13 +127,15 @@ export const findTeacher = async( req, res, next) =>{
 
     try {
         const { id } = req.params;
-        const teacher = await Teacher.findById (id);
+        const teacher = await Teacher.findOne({ _id:id,"is_deleted.status":false});
         
-        res.status(200).json( { message:`teacher is found` , data : teacher} )
+        res.status(200).json( { message:`teacher is found` , data:teacher} )
         
        
        
     }   catch (error) {
+        console.log(error);
+        
         return next(new httpError("internal server error",500))
     }
 
@@ -109,13 +155,90 @@ export const updateTeacherDetailes = async (req, res, next) =>{
     
     try {
         const { id } = req.params;
-        const TeacherData = {...req.body};
-        
-        if(req.file && req.file.path){
-         TeacherData.profile_pic = req.file.path.slice(8)
+        const {first_name, last_name, dob, email, phone, gender, status, password, subject } =req.body
+
+
+        // all feild required 
+        if (!first_name || !last_name || !email || !dob || !phone || !status || !password || !subject || !gender ) {
+            return next(new httpError("All credentials are Required!", 400));
         }
+        
+         //age logic
+
+      const calculateAge = (dob) => {
+        const today = new Date();
+        const birthDate = new Date(dob);
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const month = today.getMonth();
+        const day = today.getDate();
+        if (month < birthDate.getMonth() || (month === birthDate.getMonth() && day < birthDate.getDate())) {
+            age--;
+        }
+        return age;
+        };
+    
+    
+    
+     
+        //email
+    
+         const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+         if (!emailRegex.test(email)) {
+        return next(new httpError("Invalid email format!", 400));
+         }
+    
+        //password
+    
+        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
+        if (!passwordRegex.test(password)) {
+        return next(new httpError("Password must be at least 8 characters long, include a letter, a number, and a special character.", 400));
+        }
+    
+        //phone 
+    
+        const phoneRegex = /^\d{10}$/;
+         if (!phoneRegex.test(phone)) {
+        return next(new httpError("Phone number must be a 10-digit number.", 400));
+        }
+    
+    
+    
+        // Check if teacher already exists
+        const teacher = await Teacher.findOne( {$or: [ { email }, { phone } ] ,_id: { $ne: id } } )
+    
+        if (teacher) {
+        return next(new httpError("teacher with this email or phone already exists!", 400));
+        }
+    
+        //hashed password
+    
+        const hashedPassword = await bcrypt.hash(password, parseInt(process.env.SALT_VALUE));
+    
+        //picture path
+        let profilePicturePath;
+        if (req.file) {
+        profilePicturePath = req.file.path.slice(8);   
+        }
+    
 
        
+
+
+        const TeacherData = {
+          first_name,
+          last_name,
+          dob,
+          email,
+          phone,
+          profile_pic: profilePicturePath,
+          gender,
+          status,
+          password: hashedPassword,
+          subject,
+          age:calculateAge(dob),
+        }; 
+         
+
          const updateTeacher = await Teacher.findOneAndUpdate (
             { _id: id },
             { $set: TeacherData },
@@ -149,8 +272,22 @@ export const updateTeacherDetailes = async (req, res, next) =>{
 export const deleteTeacher = async ( req, res, next)=>{
     try {
         const { id } = req.params;
-        const deleteOneTeacher = await Teacher.findOneAndDelete(
-            { _id: id }
+        if(!id){
+            return next(new httpError("no id found",404))
+        }
+
+
+        const deleteOneTeacher = await Teacher.findOneAndUpdate(
+            { _id: id , "is_deleted.status":false},
+            {
+              $set:{
+                "is_deleted.status":true,
+                "is_delted.deleted_by":req.admin.id,
+                "is_deleted.deleted_at":new Date()
+
+              },
+            },
+            {new:true}
         )
 
         if ( !deleteOneTeacher ) {
@@ -161,6 +298,7 @@ export const deleteTeacher = async ( req, res, next)=>{
             res.status(202).json({message:`teacher deleted successfully` ,data:deleteOneTeacher})
 
     }   catch (error) {
+        
         return next(new httpError("internal server error",500))
     }
 }

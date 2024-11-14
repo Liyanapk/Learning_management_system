@@ -14,7 +14,7 @@ export const addStudent = async ( req, res, next ) => {
 
 
 
-        const {first_name, last_name, email, phone, gender, dob, student_id, status, password, batch,age} =req.body;
+        const {first_name, last_name, email, phone, gender, dob, status, password, batch} =req.body;
 
         //age logic
 
@@ -32,7 +32,7 @@ export const addStudent = async ( req, res, next ) => {
 
 
         // all feild required 
-        if (!first_name || !last_name || !email || !dob || !phone || !status || !password || !student_id || !batch || !gender) {
+        if (!first_name || !last_name || !email || !dob || !phone || !status || !password || !batch || !gender) {
             return next(new httpError("All credentials are Required!", 400));
         }
 
@@ -76,17 +76,43 @@ export const addStudent = async ( req, res, next ) => {
         if (req.file) {
             profilePicturePath = req.file.path.slice(8);
         }
+
+        //student_id
+
+         function studentID (firstName,phoneNumber,lastName){
+            const first =firstName.toUpperCase().slice(0,2);
+            const number =phoneNumber.toString().slice(7)
+            const last = lastName.toLowerCase().slice(0,1)
+            const random =Math.floor(Math.random()*1000).toString().padStart('0',3)
+
+            return`${first}${number}${last}${random}`
+        }
+
+        const studentId = studentID(first_name,phone,last_name)
   
      
-        const newStudent = new Student(
-            { first_name, last_name, email, phone, gender, dob, student_id, status, password: hashedPassword, batch, profile_pic: profilePicturePath,age: calculateAge(dob), } 
-         );
+        const newStudent = new Student({
+          first_name,
+          last_name,
+          email,
+          phone,
+          gender,
+          dob,
+          student_id:studentId,
+          status,
+          password: hashedPassword,
+          batch,
+          profile_pic: profilePicturePath,
+          age: calculateAge(dob),
+        }); 
+         
     
         await newStudent.save();
         res.status(201).json ( { message: 'student created successfully', data: newStudent } );
         
       
     } catch (error) {
+       console.log(error);
        
        return next(new httpError("error creating student",500))
     }
@@ -163,7 +189,7 @@ export const updateStudentDetailes = async (req, res, next) =>{
         }
 
 
-         const {first_name, last_name, email, phone, gender, dob, student_id, status, password, batch,age} =req.body;
+         const {first_name, last_name, email, phone, gender, dob, status, password, batch} =req.body;
         //age logic
 
         const calculateAge = (dob) => {
@@ -183,23 +209,44 @@ export const updateStudentDetailes = async (req, res, next) =>{
          
         //email
 
-        const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
-        if (!emailRegex.test(email)) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if ( req.body.email && !emailRegex.test(email)) {
             return next(new httpError("Invalid email format!", 400));
+            
         }
+        
+        
 
         //password
 
         const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
         if (!passwordRegex.test(password)) {
-            return next(new httpError("Password must be at least 8 characters long, include a letter, a number, and a special character.", 400));
+            return next(new httpError("Password must be at least 6 characters long, include a letter, a number, and a special character.", 400));
         }
 
         //phone 
 
         const phoneRegex = /^\d{10}$/;
-        if (!phoneRegex.test(phone)) {
+        if ( req.body.phone && !phoneRegex.test(phone)) {
             return next(new httpError("Phone number must be a 10-digit number.", 400));
+        }
+       //dob
+        if( req.body.dob ) {
+            updateData.age = calculateAge(dob)
+        }
+        
+        //gender
+        if( req.body.gender){
+            updateData.gender =gender;
+        }
+        //status
+        if( req.body.status){
+            updateData.status =status;
+        }
+       
+        //batch
+        if( req.body.batch){
+            updateData.batch =batch;
         }
 
 
@@ -229,13 +276,12 @@ export const updateStudentDetailes = async (req, res, next) =>{
             phone,
             gender,
             dob,
-            student_id,
             status,
             password: hashedPassword,
             batch,
             profile_pic: profilePicturePath,
             age: calculateAge(dob),
-        };
+          }; 
 
     
        
@@ -247,11 +293,13 @@ export const updateStudentDetailes = async (req, res, next) =>{
         );
 
 
+
         if (!updateStudent) {
             console.log("err",error)
            return next(new httpError("student not found",404))
 
         } else {
+
 
             res.status(200).json({ message:`student updated successfully` , data : updateStudent })
         }

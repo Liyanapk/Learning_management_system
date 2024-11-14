@@ -120,6 +120,8 @@ export const addAdmin = async (req, res, next) => {
             profilePicturePath = req.file.path.slice(8);
         }
 
+     
+
         const newAdmin = new Admin({
             first_name,
             last_name,
@@ -324,7 +326,7 @@ export const deleteAdmin = async ( req, res, next)=>{
            return next (new httpError("No admin found!",400))
         }
 
-            res.status(202).json({message:`admin deleted successfully` , data:deleteOneAdmin })
+            res.status(202).json({message:`admin deleted successfully`})
 
     }   catch (error) {
         return next (new httpError("Internal Server Error!",500))

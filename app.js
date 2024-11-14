@@ -8,12 +8,15 @@ import batchrouter from './routes/v1/admin/batchRoutes.js'
 import lecturerouter from './routes/v1/admin/lectureRoutes.js'
 import { dbconnect } from './configs/dbconfig.js';
 import { errorMiddleware, notFound } from './middleware/errorMiddleware.js';
+import { specs } from './swagger.js';
+import swaggerUi from 'swagger-ui-express'
 
 
 dotenv.config()
 const app = express()
 const PORT = process.env.PORT || 4001
 
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 
 app.use (express.json())

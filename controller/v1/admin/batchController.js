@@ -24,6 +24,8 @@ export const addBatch = async ( req, res, next ) => {
 
       //create new batch
       const newBatch = new Batch({ batch_name, in_charge });
+   
+
         await newBatch.save();
   
       res.status(201).json(newBatch);
@@ -47,7 +49,10 @@ export const addBatch = async ( req, res, next ) => {
         if(!batch){
             return next(new httpError("Error finding batch",400))
         }
-        res.status(200).json( batch );
+
+   
+
+        res.status(200).json( batch);
       
 
     } catch (error) {

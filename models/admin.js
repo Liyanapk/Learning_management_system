@@ -72,11 +72,11 @@ const testAdminSchema = new mongoose.Schema ({
             default:false
         },
 
-        // deleted_by: { 
-        //     type: mongoose.Schema.Types.ObjectId ,
-        //     ref: 'Admin',
-        //     default: null
-        // },
+        deleted_by: { 
+            type: mongoose.Schema.Types.ObjectId ,
+            ref: 'Admin',
+            default: null
+        },
 
         deleted_at: {
             type: Date,
