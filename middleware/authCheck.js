@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import httpError from '../utils/httpError.js';
 import Admin from '../models/admin.js';
 
-const secretKey = '5?#562@' 
+
 export const adminAuth = async (req, res, next) => {
 
     try {
@@ -17,7 +17,7 @@ export const adminAuth = async (req, res, next) => {
         const token = authHeader.split(" ")[1];
         
         
-        jwt.verify(token, secretKey, async (err, decoded) => {
+        jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => { 
 
             if (err) {
                 console.error("Token verification error:", err);
@@ -30,7 +30,7 @@ export const adminAuth = async (req, res, next) => {
 
             try {
 
-                const validAdmin = await Admin.findOne({ _id: decoded.id, "isDeleted.status": false, status: "active" });
+                const validAdmin = await Admin.findOne({ _id: decoded.id, "is_deleted.status": false, status: "active" });
 
                 if (!validAdmin) {
                     return next(new httpError("Unauthorized - Admin not found or inactive", 404));
@@ -38,6 +38,7 @@ export const adminAuth = async (req, res, next) => {
 
                 next();
             } catch (dbError) {
+                console.log(dbError)
 
                 return next(new httpError("Database error during admin validation", 500));
             }
