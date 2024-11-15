@@ -15,6 +15,29 @@ in_charge: {
     required: true
 
 },
+type:{
+    type :String,
+    enum:['free','paid','crash course'],
+    required: true,
+},
+status:{
+    type :String,
+    enum:['draft','inprogress','completed'],
+    required: true,
+},
+
+    duration: {
+        from: { 
+          type: Date, 
+          required: true 
+        },
+        to: { 
+          type: Date, 
+          required: true 
+        }
+      },
+
+
 
 is_deleted: {
 

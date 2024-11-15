@@ -30,6 +30,11 @@ const testStudentSchema = new mongoose.Schema ({
         required: true,
         
     },
+    parent_number:{
+        type: Number,
+        required: true,
+
+    },
     profile_pic : {
         type : String,
         default: null,
@@ -53,7 +58,8 @@ const testStudentSchema = new mongoose.Schema ({
     },
 
     status : {
-        type : Boolean,
+        type : String,
+        enum:['active','inactive','terminated'],
         required : true,
     },
 
@@ -66,6 +72,10 @@ const testStudentSchema = new mongoose.Schema ({
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'Batch', 
         required: true,
+    },
+    address:{
+        type : String,
+        required : true,
     },
 
 

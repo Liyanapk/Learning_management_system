@@ -46,10 +46,15 @@ const testTeacherSchema = new mongoose.Schema ( {
 
   
     status : {
-        type : Boolean,
+        type : String,
+        enum:['active','resigned','terminated' ,'on_leave'],
         required : true,
     },
-
+    
+    address:{
+        type:String,
+        required:true,
+    },
     password: {
         type: String,
         required: true,

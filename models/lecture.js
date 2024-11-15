@@ -6,25 +6,16 @@ const testLectureSchema = new  mongoose.Schema( {
    
     slot: {
 
-        type: {
-
             from: { type: Date, required: true },
             to: { type: Date, required: true }
 
-        },
-
-        required: true
     },
 
     link: {
-        type: {
-
+      
             live: {type: String, default: null},
             recorded: {type: String, default: null}
 
-        },
-
-        default: null
     },
 
     status: {
