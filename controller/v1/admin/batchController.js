@@ -7,10 +7,10 @@ import httpError from "../../../utils/httpError.js";
 export const addBatch = async ( req, res, next ) => {
     try {
 
-      const { batch_name, in_charge } = req.body;
+      const { batch_name, in_charge, type, status, duration } = req.body;
       
       //required
-      if(!batch_name || !in_charge) {
+      if(!batch_name || !in_charge ||!type || !status || !duration) {
         return next(new httpError("Batch name and teacher incharge is required" ,400))
       }
        
@@ -23,7 +23,7 @@ export const addBatch = async ( req, res, next ) => {
       
 
       //create new batch
-      const newBatch = new Batch({ batch_name, in_charge });
+      const newBatch = new Batch({ batch_name, in_charge, type, status, duration });
    
 
         await newBatch.save();
@@ -110,19 +110,16 @@ export const updateBatchDetailes = async (req, res, next) =>{
             return next(new httpError("Not found",400))
         }
 
-        const { batch_name, in_charge } = req.body;
+        const { batch_name, in_charge, type, status, duration } = req.body;
         
 
-        //required
-        if(!batch_name || !in_charge) {
-            return next(new httpError("Batch name and teacher incharge is required" ,400))
-          }
+       
 
         if(req.file && req.file.path){
          BatchData.profile_pic = req.file.path.slice(8)
          
         }
-        const BatchData = { batch_name, in_charge }
+        const BatchData = { batch_name, in_charge , type, status, duration}
        
          const updateBatch = await Batch.findOneAndUpdate (
             { _id: id },

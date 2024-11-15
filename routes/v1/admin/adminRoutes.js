@@ -28,7 +28,7 @@ const router = express.Router();
 router.post('/login', adminLogin);
 
 // Middleware for authentication
-// router.use(adminAuth);
+router.use(adminAuth);
 
 /**
  * @swagger

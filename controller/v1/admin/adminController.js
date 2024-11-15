@@ -2,11 +2,10 @@
 import Admin from "../../../models/admin.js";
 import jwt from 'jsonwebtoken';
 import httpError from "../../../utils/httpError.js";
-import { adminRoleObj } from '../../../configs/adminConfig.js'
+
 import bcrypt from 'bcrypt'
 
-const JWT_SECRET = process.env.JWT_SECRET || "5?#562@";
-const superadmin = adminRoleObj.SUPERADMIN
+
 
 //admin login
 
@@ -25,7 +24,7 @@ export const adminLogin = async( req, res, next ) =>{
     
             const admin = await Admin.findOne( { email } )
             
-            if( !admin ) {
+            if (! admin) {
 
                 return next ( new httpError ( "Admin not found ", 400 ))
             }
@@ -40,12 +39,12 @@ export const adminLogin = async( req, res, next ) =>{
 
             //jwt token 
 
-            const token = jwt.sign({ id: admin.id, role: Admin.role }, JWT_SECRET, { expiresIn: '24h' });
+            const token = jwt.sign({ id: admin.id, role: Admin.role }, process.env.JWT_SECRET, { expiresIn: '24h' });
 
-            res.json({message: "Login successfull" , token})
+            res.status(200).json({message: "Login successfull" , token})
 
            } catch (error) {
-
+console.log(error)
              return next ( new httpError ("Failed to login",500))
            }
 
@@ -59,10 +58,7 @@ export const addAdmin = async (req, res, next) => {
 
          try {
 
-            if (req.user.role !== superadmin) {
-
-                return next(new httpError("Only Super Admin can Create Admins", 403))
-            }
+         
 
         const { first_name, last_name, email, dob, phone, status, password, role } = req.body;
          
@@ -215,10 +211,7 @@ export const updateAdminDetailes = async (req, res, next) =>{
     try {
 
 
-        if (req.user.role !== superadmin) {
-
-            return next(new httpError("Only Super Admin can Update Admins or Super admins", 403))
-        }
+       
 
         const { id } = req.params;
 
@@ -328,10 +321,7 @@ export const updateAdminDetailes = async (req, res, next) =>{
 export const deleteAdmin = async ( req, res, next)=>{
     try {
 
-        if (req.user.role !== superadmin) {
-
-            return next(new httpError("Only Super Admin can delete admins or superadmins", 403));
-        }
+       
 
         const {id} = req.params;
 

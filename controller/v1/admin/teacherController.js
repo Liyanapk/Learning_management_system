@@ -11,7 +11,7 @@ export const addTeacher = async ( req, res, next ) => {
     try {
 
 
-const {first_name, last_name, dob, email, phone, gender, status, password, subject } =req.body
+const {first_name, last_name, dob, email, phone, gender, status, password, subject, address } =req.body
 
     //age logic
 
@@ -29,12 +29,16 @@ const {first_name, last_name, dob, email, phone, gender, status, password, subje
 
 
 
+if( !first_name || !last_name || !dob || !email || !phone || !gender || !status || !password || !subject ||!address){
+    return next (new httpError("all credentials are required!",403))
+}
+
  
     //email
 
      const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
      if (!emailRegex.test(email)) {
-    return next(new httpError("Invalid email format!", 400));
+    return next(new httpError("Invalid email format!", 404));
      }
 
     //password
@@ -48,7 +52,7 @@ const {first_name, last_name, dob, email, phone, gender, status, password, subje
 
     const phoneRegex = /^\d{10}$/;
      if (!phoneRegex.test(phone)) {
-    return next(new httpError("Phone number must be a 10-digit number.", 400));
+    return next(new httpError("Phone number must be a 10-digit number.", 408));
     }
 
 
@@ -84,6 +88,7 @@ const {first_name, last_name, dob, email, phone, gender, status, password, subje
           password: hashedPassword,
           subject,
           age :calculateAge(dob),
+          address,
         });
     
         await newTeacher.save();
@@ -158,7 +163,7 @@ export const updateTeacherDetailes = async (req, res, next) =>{
     
     try {
         const { id } = req.params;
-        const {first_name, last_name, dob, email, phone, gender, status, password, subject } =req.body
+        const {first_name, last_name, dob, email, phone, gender, status, password, subject, address } =req.body
 
 
     
@@ -186,6 +191,7 @@ export const updateTeacherDetailes = async (req, res, next) =>{
             gender,
             status,
             subject,
+            address,
          
           }; 
     
