@@ -11,7 +11,7 @@ router.use(adminAuth)
 
 
 router.post('/', addBatch)
-router.get('/list',listBatch)
+router.get('/',listBatch)
 router.get('/:id',findBatch)
 router.patch('/:id',updateBatchDetailes)
 router.delete('/:id',deleteBatch)

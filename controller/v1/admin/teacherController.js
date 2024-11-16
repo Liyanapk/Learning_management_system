@@ -92,10 +92,18 @@ if( !first_name || !last_name || !dob || !email || !phone || !gender || !status 
         });
     
         await newTeacher.save();
-        res.status(201).json ( { message: 'teacher created successfully', data: newTeacher } );
+
+        const getNewTeacher = await Teacher.findById(newTeacher._id).select('-__v -createdAt -updatedAt -is_deleted')
+        .populate({
+            path:'subject',
+            select:'name',
+           
+        })
+        res.status(201).json ( { message: 'teacher created successfully', data: getNewTeacher } );
         
       
     } catch (error) {
+        console.log(error)
         return next(new httpError("error creating teacher",500))
     }
   };
@@ -112,10 +120,55 @@ if( !first_name || !last_name || !dob || !email || !phone || !gender || !status 
 
     try {
 
-        const teacher = await Teacher.find({"is_deleted.status":false});
+        
+        //pagination
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 4;
+        const skip = (page - 1) * limit;
 
-        res.status(200).json( teacher );
-      
+        //filtering
+        const filter = {"is_deleted.status": false};
+        if(req.query.searchTerm){
+
+            filter.$or=[
+                { first_name : { $regex: req.query.searchTerm, $options: 'i' } },
+                { last_name : { $regex: req.query.searchTerm, $options: 'i' } },
+                { status : { $regex: req.query.searchTerm, $options:'i' }},
+           
+            ]
+        }
+
+        //sorting
+        const sort = {};
+        if(req.query.sortBy){
+            const [field,order] = req.query.sortBy.split(':');
+            sort [field] = order === 'desc' ? -1 : 1;
+        }
+        
+
+    
+
+
+        //result
+        const total = await Teacher.countDocuments(filter);
+
+        const allTeacher = await Teacher.find(filter)
+          .sort(sort)
+          .skip(skip)
+          .limit(limit)
+          .select('-password -is_deleted -__v -createdAt -updatedAt')
+        
+
+
+        //response send
+        res.status(200).json({
+            message: 'Teacher retrieved successfully',
+            data: allTeacher,
+            totalPages: Math.ceil(total/limit),
+            currentPage: page,
+            totalItems: total,
+          });
+
 
     } catch (error) {
        return next(new httpError("internal server error",500))
@@ -285,7 +338,7 @@ export const deleteTeacher = async ( req, res, next)=>{
             {
               $set:{
                 "is_deleted.status":true,
-                "is_delted.deleted_by":req.admin.id,
+                "is_delted.deleted_by":req.Admin.id,
                 "is_deleted.deleted_at":new Date()
 
               },

@@ -10,7 +10,7 @@ const router=express.Router()
 router.use(adminAuth)
 
 router.post('/',addSubject)
-router.get('/list',listSubject)
+router.get('/',listSubject)
 router.get('/:id',findSubject)
 router.patch('/:id',updatesubjectDetailes)
 router.delete('/:id',deleteSubject)

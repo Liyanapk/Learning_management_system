@@ -64,7 +64,7 @@ router.post('/', upload.single('pic'), addAdmin);
  *       200:
  *         description: A list of admins
  */
-router.get('/list', listAdmin);
+router.get('/', listAdmin);
 
 /**
  * @swagger

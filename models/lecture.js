@@ -42,10 +42,19 @@ const testLectureSchema = new  mongoose.Schema( {
         required: true
     },
 
-    student: {
+    attendees: {
         type: [mongoose.Schema.Types.ObjectId],
         ref:'Student',
         required: true
+    },
+
+    notes:{
+        type:String,
+        required:true,
+    },
+    zoom_link :{
+    type:Strin,
+    required:true,
     },
 
     isDeleted: {

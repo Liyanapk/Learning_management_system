@@ -3,14 +3,26 @@ import mongoose from 'mongoose'
 
 const testSubjectSchema = new mongoose.Schema ( {
 
-subject_name : {
+name : {
     type : String,
     required : true,
 
 },
+created_by: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Admin',
+    required: true
+},
+
+updated_by: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Admin',
+    default: null
+},
 
 
-isDeleted: {
+
+is_deleted: {
 
     status: { 
         type: Boolean ,

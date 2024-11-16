@@ -21,11 +21,11 @@ const questionSchema = new mongoose.Schema ({
   options:{
     A:{
         type:String,
-        requied:true,
+        required:true,
     },
     B:{
         type:String,
-        requied:true,
+        required:true,
     },
     C:{
         type:String,
@@ -37,6 +37,11 @@ const questionSchema = new mongoose.Schema ({
     },
 
   }, 
+
+  answre:{
+         type:String,
+         required:true,
+  },
   
   created_by:{
     type:mongoose.Schema.Types.ObjectId,

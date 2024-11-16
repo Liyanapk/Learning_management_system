@@ -9,7 +9,7 @@ const router=express.Router()
 router.use(adminAuth)
 
 router.post('/',upload.single('pic'),addTeacher)
-router.get('/list',listTeacher)
+router.get('/',listTeacher)
 router.get('/:id',findTeacher)
 router.patch( '/:id',upload.single('pic'),updateTeacherDetailes)
 router.delete('/:id' ,deleteTeacher)

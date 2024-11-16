@@ -15,7 +15,7 @@ export const adminLogin = async( req, res, next ) =>{
            try {
 
             const { email,password }= req.body
-            console.log(req.body); // Add this before the validation check
+         
 
             if( !email || !password ) {
 
@@ -44,7 +44,7 @@ export const adminLogin = async( req, res, next ) =>{
             res.status(200).json({message: "Login successfull" , token})
 
            } catch (error) {
-console.log(error)
+
              return next ( new httpError ("Failed to login",500))
            }
 
@@ -94,7 +94,7 @@ export const addAdmin = async (req, res, next) => {
 
         const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
         if (!passwordRegex.test(password)) {
-            return next(new httpError("Password must be at least 8 characters long, include a letter, a number, and a special character.", 400));
+            return next(new httpError("Password must be at least 6 characters long, include a letter, a number, and a special character.", 400));
         }
 
         //phone 
@@ -139,7 +139,16 @@ export const addAdmin = async (req, res, next) => {
         });
 
         await newAdmin.save();
-        res.status(201).json({ message: 'Admin created successfully', data: newAdmin });
+
+        const adminData = await Admin.findById(newAdmin._id).select('-is_deleted -createdAt -updatedAt -__v ');
+        
+        res.status(201).json({
+            status:true,
+             message: 'Admin created successfully', 
+             data: adminData,
+            access_token:null,
+         });
+
     } catch (error) {
         console.log(error);
         return next(new httpError("Failed to create admin", 500));
@@ -153,12 +162,54 @@ export const addAdmin = async (req, res, next) => {
 export const listAdmin = async( req, res, next) =>{
 
     try {
-          //get all (not get soft deleted)
-        const admin = await Admin.find();
-        if(!admin){
-            return next (new httpError(" no admin " ,400 ));
+       
+        //pagination
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 4;
+        const skip = (page - 1) * limit;
+
+        //filtering
+        const filter = {"is_deleted.status": false};
+        if(req.query.searchTerm){
+
+            filter.$or=[
+                { first_name : { $regex: req.query.searchTerm, $options: 'i' } },
+                { last_name : { $regex: req.query.searchTerm, $options:'i' }},
+                { status : { $regex: req.query.searchTerm, $options:'i' }}
+            ]
         }
-        res.status(200).json(admin);
+
+        //sorting
+        const sort = {};
+        if(req.query.sortBy){
+            const [field,order] = req.query.sortBy.split(':');
+            sort [field] = order === 'desc' ? -1 : 1;
+        }
+        
+
+    
+
+
+        //result
+        const total = await Admin.countDocuments(filter);
+
+        const allAdmins = await Admin.find(filter)
+          .sort(sort)
+          .skip(skip)
+          .limit(limit)
+          .select('-password -is_deleted -__v -createdAt -updatedAt' );
+
+
+        //response send
+        res.status(200).json({
+            status:true,
+            message: 'Admins retrieved successfully',
+            data: allAdmins,
+            access_token:null,
+            totalPages: Math.ceil(total/limit),
+            currentPage: page,
+            totalItems: total,
+          });
 
         
 
@@ -183,12 +234,20 @@ export const getOneAdmin = async( req, res, next) =>{
        //not show soft deleted
         const admin = await Admin.findOne( {_id: id ,"is_deleted.status": false } );
 
+
+        const getAdmin = await Admin.findById(admin._id).select('-__v -createdAt -updatedAt -is_deleted -password')
+
         if (!admin) {
 
             return next (new httpError("Admin not present!",402))
         }else {
 
-            res.status(200).json( { message:`admin is found` , data : admin} )
+            res.status(200).json( { 
+                status:true,
+                message:`admin is found` , 
+                data : getAdmin,
+                access_token:null
+            } )
         }
         
     } catch (error) {
@@ -209,9 +268,6 @@ export const updateAdminDetailes = async (req, res, next) =>{
 
     
     try {
-
-
-       
 
         const { id } = req.params;
 
@@ -288,9 +344,6 @@ export const updateAdminDetailes = async (req, res, next) =>{
         }
 
      
- 
-       
-       
 
         // detailes of updates admin
         const updateAdmin = await Admin.findOneAndUpdate(
@@ -299,13 +352,23 @@ export const updateAdminDetailes = async (req, res, next) =>{
             { new: true, runValidators: true }
         );
 
-     
+        
+
+        const getAdmin = await Admin.findById(updateAdmin._id).select('-__v -createdAt -updatedAt -is_deleted')
 
         if (!updateAdmin) {
             return next(new httpError("Admin not updated!", 400));
         }
 
-        res.status(200).json({ message: "Admin updated", data: updateAdmin });
+        res.status(200).json({ 
+            status:true,
+            message: "Admin updated",
+             data: getAdmin,
+             access_token:null
+
+            
+            });
+
     } catch (error) {
         console.error("Error in updateAdminDetailes:", error);
         return next(new httpError("Server Error", 500));  
@@ -325,16 +388,11 @@ export const deleteAdmin = async ( req, res, next)=>{
 
         const {id} = req.params;
 
-        if (!id) {
+        if (! id) {
             return next (new httpError("Error finding admin",400))
         }
 
-        const adminID = req.user?.id
-
-        if (!adminID) {
-
-            return next(new httpError("Unauthorized action", 403));
-        }
+       
 
         //soft delete
         const deleteOneAdmin = await Admin.findOneAndUpdate(
@@ -343,13 +401,15 @@ export const deleteAdmin = async ( req, res, next)=>{
             
              {
                 $set:{"is_deleted.status":true,
-                       "is_deleted.deleted_by": req.admin.id,
+                       "is_deleted.deleted_by": req.Admin.id,
                         "is_deleted.deleted_at":new Date()
                 }
              },
              {new :true}
 
         );
+
+       
         
 
         if ( !deleteOneAdmin ) {
@@ -364,3 +424,4 @@ export const deleteAdmin = async ( req, res, next)=>{
     }
 }
 
+ 

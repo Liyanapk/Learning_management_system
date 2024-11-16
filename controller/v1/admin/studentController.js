@@ -108,9 +108,21 @@ export const addStudent = async ( req, res, next ) => {
           address,
         }); 
          
-    
+     
         await newStudent.save();
-        res.status(201).json ( { message: 'student created successfully', data: newStudent } );
+
+        const getStudent = await Student.findById(newStudent._id)
+        .select('-__v -is_deleted -createdAt -updatedAt')
+        .populate({
+            path:'batch',
+            select:'name status in_charge type status',
+            populate:{
+                path:'in_charge',
+                select:'first_name last_name'
+            }
+
+        })
+        res.status(201).json ( { message: 'student created successfully', data: getStudent } );
         
       
     } catch (error) {
@@ -130,15 +142,63 @@ export const addStudent = async ( req, res, next ) => {
 
 export const listStudent = async( req, res, next) =>{
 
-    try {
-        const student = await Student.find({ "is_deleted.status":false });
+    try{
+        //pagination
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 4;
+        const skip = (page - 1) * limit;
 
-        if(!student){
-            return next(new httpError("error finiding students",400))
+        //filtering
+        const filter = {"is_deleted.status": false};
+        if(req.query.searchTerm){
+
+            filter.$or=[
+                { first_name : { $regex: req.query.searchTerm, $options: 'i' } },
+                { last_name : { $regex: req.query.searchTerm, $options: 'i' } },
+                { status : { $regex: req.query.searchTerm, $options:'i' }},
+           
+            ]
         }
 
-        res.status(200).json( student );
-      
+        //sorting
+        const sort = {};
+        if(req.query.sortBy){
+            const [field,order] = req.query.sortBy.split(':');
+            sort [field] = order === 'desc' ? -1 : 1;
+        }
+        
+
+    
+
+
+        //result
+        const total = await Student.countDocuments(filter);
+
+        const allStudent = await Student.find(filter)
+          .sort(sort)
+          .skip(skip)
+          .limit(limit)
+          .select('-password -is_deleted -__v -createdAt -updatedAt -__v')
+          .populate({
+              path:'batch',
+              select:'name status in_charge type status',
+              populate:{
+                  path:'in_charge',
+                  select:'first_name last_name'
+              }
+  
+          })
+
+
+        //response send
+        res.status(200).json({
+            message: 'Student retrieved successfully',
+            data: allStudent,
+            totalPages: Math.ceil(total/limit),
+            currentPage: page,
+            totalItems: total,
+          });
+
 
     } catch (error) {
         return next(new httpError("Internal server error",500))
@@ -159,14 +219,26 @@ export const findStudent = async( req, res, next) =>{
             return next(new httpError("Id not found",400))
         }
 
-        const student = await Student.findOne(id,{ "is_deleted.status":false });
+        const student = await Student.findOne( {_id: id ,"is_deleted.status": false });
+
+        const getStudent = await Student.findById(student._id).select('-password -is_deleted -__v -createdAt -updatedAt -__v')
+        .populate({
+            path:'batch',
+            select:'name status in_charge type status',
+            populate:{
+                path:'in_charge',
+                select:'first_name last_name'
+            }
+
+        })
        
         
-        res.status(200).json( { message:`student founded successfully` , data : student} )
+        res.status(200).json( { message:`student founded successfully` , data : getStudent} )
         
        
        
     }   catch (error) {
+        console.log(error)
         return next(new httpError("internal server error",500))
     }
 
@@ -257,10 +329,21 @@ export const updateStudentDetailes = async (req, res, next) =>{
             { new: true, runValidators: true }
         );
 
+        const getUpdatedStudent = await Student.findById(updateStudent._id).select('-password -is_deleted -__v -createdAt -updatedAt -__v')
+        .populate({
+            path:'batch',
+            select:'name status in_charge type status',
+            populate:{
+                path:'in_charge',
+                select:'first_name last_name'
+            }
+
+        })
+
         if (!updateStudent) {
             return next(new httpError("Student not found", 404));
         } else {
-            res.status(200).json({ message: `Student updated successfully`, data: updateStudent });
+            res.status(200).json({ message: `Student updated successfully`, data: getUpdatedStudent });
         }
 
     } catch (error) {
@@ -288,7 +371,7 @@ export const deleteStudent = async ( req, res, next)=>{
             
              {
                 $set:{"is_deleted.status":true,
-                       "is_deleted.deleted_by": req.admin.id,
+                       "is_deleted.deleted_by": req.Admin.id,
                         "is_deleted.deleted_at":new Date()
                 }
              },
@@ -301,7 +384,7 @@ export const deleteStudent = async ( req, res, next)=>{
             return next(new httpError("student not found",404))
         }
 
-            res.status(202).json({message:`student deleted successfully` ,data:deleteOneStudent})
+            res.status(202).json({message:`student deleted successfully` })
 
     }   catch (error) {
         return next(new httpError("error deleting student",500))

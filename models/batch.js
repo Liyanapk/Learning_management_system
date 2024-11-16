@@ -3,7 +3,7 @@ import mongoose from 'mongoose'
 
 const testBatchSchema = new mongoose.Schema ({
              
-batch_name : {
+name : {
     type : String,
     required : true,
 },
