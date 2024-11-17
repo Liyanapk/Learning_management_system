@@ -45,7 +45,6 @@ export const addBatch = async ( req, res, next ) => {
       //create new batch
       const newBatch = new Batch({ name, in_charge, type, status, duration });
    
-
         await newBatch.save();
   
     
@@ -220,14 +219,18 @@ export const updateBatchDetailes = async (req, res, next) =>{
 
         const getOneBatch = await Batch.findById(updateBatch._id)
         .select("-password -is_deleted -__v -createdAt -updatedAt")
-        .populate({
-          path: 'in_charge',
-          select: ' first_name last_name email status profile_image',
-          populate: {
-              path: 'subject',
-              select: 'name'
-          }
-      }) 
+        .populate([
+            {
+               
+                    path: 'in_charge',
+                    select: 'first_name last_name email status subject profile_image',
+                    populate: {
+                        path: 'subject',
+                        select: 'name'
+                    }
+                
+            }
+        ]) 
 
          res.status(200).json({ message:`batch updated successfully` , data : getOneBatch })
         

@@ -224,13 +224,13 @@ export const findStudent = async( req, res, next) =>{
         const getStudent = await Student.findById(student._id).select('-password -is_deleted -__v -createdAt -updatedAt -__v')
         .populate({
             path:'batch',
-            select:'name status in_charge type status',
-            populate:{
+            select:'name status in_charge type status'  })
+            .populate({
                 path:'in_charge',
                 select:'first_name last_name'
-            }
+            })
 
-        })
+      
        
         
         res.status(200).json( { message:`student founded successfully` , data : getStudent} )

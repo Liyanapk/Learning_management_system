@@ -6,6 +6,8 @@ import subjectrouter from './routes/v1/admin/subjectRoutes.js'
 import studentrouter from './routes/v1/admin/studentRoutes.js'
 import batchrouter from './routes/v1/admin/batchRoutes.js'
 import lecturerouter from './routes/v1/admin/lectureRoutes.js'
+import questionrouter from './routes/v1/admin/questionRoute.js'
+import assignmentrouter from './routes/v1/admin/assignmentRoutes.js'
 import { dbconnect } from './configs/dbconfig.js';
 import { errorMiddleware, notFound } from './middleware/errorMiddleware.js';
 import { specs } from './swagger.js';
@@ -30,6 +32,9 @@ app.use('/api/v1/subject',subjectrouter)
 app.use('/api/v1/student',studentrouter)
 app.use('/api/v1/batch',batchrouter)
 app.use('/api/v1/lecture',lecturerouter)
+app.use('/api/v1/question',questionrouter)
+app.use('/api/v1/assignment',assignmentrouter)
+
 
 app.use(notFound)
 app.use(errorMiddleware)

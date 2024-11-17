@@ -77,6 +77,11 @@ const testStudentSchema = new mongoose.Schema ({
         type : String,
         required : true,
     },
+    in_charge: {
+    
+     type: mongoose.Schema.Types.ObjectId,
+         ref: 'Teacher'
+         },
 
 
     is_deleted: {

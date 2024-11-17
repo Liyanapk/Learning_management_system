@@ -21,61 +21,75 @@ const questionSchema = new mongoose.Schema ({
   options:{
     A:{
         type:String,
-        required:true,
+        required: false
     },
     B:{
         type:String,
-        required:true,
+        required: false
     },
     C:{
         type:String,
-        default:null,
+        required: false
     },
     D:{
         type:String,
-        default:null,
+        required: false
     },
 
   }, 
 
-  answre:{
+  answer:{
          type:String,
          required:true,
+  },
+
+  batch:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'Batch',
+        required:true
   },
   
   created_by:{
     type:mongoose.Schema.Types.ObjectId,
-    refPath: 'AdminAndTeacher',
+    ref: 'Admin',
     required:true,
 },
-     AdminAndTeacher:{
-     type:String,
-     enum:['admin','teacher'],
-     required:true
 
-    },
-
-    updated_by:{
+  updated_by:{
         type:mongoose.Schema.Types.ObjectId,
-        refPath: 'AdminAndTeacher',
-        required:true,
+        ref: 'Admin',
+        default: null
     },
-         AdminAndTeacher:{
-         type:String,
-         enum:['admin','teacher'],
-         required:true
+       
 
-        },
-    
-    last_date :{
-       type:Date,
-       required:true,
+    is_deleted: {
 
-    },
+      status: { 
+          type: Boolean ,
+          default:false
+      },
+
+      deleted_by: { 
+          type: mongoose.Schema.Types.ObjectId ,
+          ref: 'Admin',
+          default: null
+      },
+
+      deleted_at: {
+          type: Date,
+          default: null
+      },
+
+  }
+
+},
+
+{
+  timestamps: true
+}
+
+)
 
 
-})
-
-
-const Question = mongoose.model ( 'Assignment', questionSchema )
+const Question = mongoose.model ( 'questions', questionSchema )
 export default Question

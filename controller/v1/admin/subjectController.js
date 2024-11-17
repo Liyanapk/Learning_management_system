@@ -106,6 +106,7 @@ export const findSubject = async( req, res, next) =>{
 
     try {
         const { id } = req.params;
+        
         const subject = await Subject.findOne({_id:id ,"is_deleted.status": false });
 
         const getSubject = await Subject.findById(subject._id).select('-__v -is_deleted -createdAt -updatedAt')
@@ -135,6 +136,8 @@ export const updatesubjectDetailes = async (req, res, next) =>{
     try {
         const { id } = req.params;
         const { name }=req.body
+        const subjectCreatedBy = req.Admin.id
+
         
         if(req.file && req.file.path){
          SubjectData.profile_pic = req.file.path.slice(8)
@@ -146,9 +149,12 @@ export const updatesubjectDetailes = async (req, res, next) =>{
        
          const updateSubject = await Subject.findOneAndUpdate (
             { _id: id },
-            { $set: SubjectData },
+            { $set: SubjectData,updated_by:subjectCreatedBy },
             { new: true, runValidators: true }
         );
+
+        
+       
 
 
         const getUpdatedSubject = await Subject.findById(updateSubject._id).select('-__v -is_deleted -createdAt -updatedAt')
@@ -157,12 +163,15 @@ export const updatesubjectDetailes = async (req, res, next) =>{
 
             return next(new httpError("subject not found",404))
 
-        } else {
-
-            res.status(200).json({ message:`subject name updated successfully` , data : getUpdatedSubject })
+        }
+        if(!subjectCreatedBy){
+            return next(new httpError("unotherized action",300))
         }
 
-    }   catch (error) {
+            res.status(200).json({ message:`subject name updated successfully` , data : getUpdatedSubject })
+       
+
+    }  catch (error) {
         console.log(error)
         return next(new httpError("subject not updated!",500))
     }

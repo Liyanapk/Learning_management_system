@@ -52,12 +52,12 @@ const testLectureSchema = new  mongoose.Schema( {
         type:String,
         required:true,
     },
-    zoom_link :{
-    type:Strin,
-    required:true,
-    },
+    // zoom_link :{
+    // type:Strin,
+    // required:true,
+    // },
 
-    isDeleted: {
+    is_deleted: {
 
         status: { 
             type: Boolean ,

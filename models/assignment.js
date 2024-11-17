@@ -12,10 +12,10 @@ const assignmentSchema = new mongoose.Schema({
             enum:['pending','complete'],
             required:true
         },
-        attachement:[{
-            type:String,
+        attachement:{
+            type:[String],
             required:true
-        }],
+        },
         students:{
             type:mongoose.Schema.Types.ObjectId,
             ref: 'Student',
@@ -36,41 +36,56 @@ const assignmentSchema = new mongoose.Schema({
     },
     created_by:{
         type:mongoose.Schema.Types.ObjectId,
-        refPath: 'AdminAndTeacher',
+        ref: 'Admin',
         required:true,
     },
-         AdminAndTeacher:{
-         type:String,
-         enum:['admin','teacher'],
-         required:true
-
-        },
-
-        updated_by:{
-            type:mongoose.Schema.Types.ObjectId,
-            refPath: 'AdminAndTeacher',
-            required:true,
-        },
-             AdminAndTeacher:{
-             type:String,
-             enum:['admin','teacher'],
-             required:true
-    
-            },
         
-        last_date :{
-           type:Date,
-           required:true,
 
+    updated_by:{
+    type:mongoose.Schema.Types.ObjectId,
+    ref: 'Admin',
+    default:null,
+    },
+
+    last_date :{
+    type:Date,
+     required:true,
+
+    },
+    questions:{
+    type:mongoose.Schema.Types.ObjectId,
+    ref:'Question',
+    required:true,
+
+    },
+
+    is_deleted: {
+
+        status: { 
+            type: Boolean ,
+            default:false
         },
-        questions:{
-            type:mongoose.Schema.Types.ObjectId,
-            ref:'Question',
-            required:true,
-
-        }
-})
-
+    
+        deleted_by: { 
+            type: mongoose.Schema.Types.ObjectId ,
+            ref: 'Admin',
+            default: null
+        },
+    
+        deleted_at: {
+            type: Date,
+            default: null
+        },
+    
+    }
+    
+    }, {
+    
+    timestamps:true
+    
+    }
+    
+    )
 
 const Assignment = mongoose.model('Assigment',assignmentSchema)
 export default Assignment

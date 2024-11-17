@@ -189,8 +189,15 @@ export const findTeacher = async( req, res, next) =>{
         if(!teacher){
             return next(new httpError("No teacher found",400))
         }
+
+        const getTeacher  = await Teacher.findById(teacher._id).select('-__v -is_deleted -createdAt -updatedAt -password')
+        .populate({
+            path:'subject',
+            select:'name',
+           
+        })
         
-        res.status(200).json( { message:`teacher is found` , data:teacher} )
+        res.status(200).json( { message:`teacher is found` , data:getTeacher} )
         
        
        
@@ -306,10 +313,17 @@ export const updateTeacherDetailes = async (req, res, next) =>{
 
             return next(new httpError("Teacher not found",400))
 
-        } else {
 
-            res.status(200).json({ message:`teacher updated` , data : updateTeacher })
-        }
+        } 
+
+        const getTeacher = await Teacher.findById(updateTeacher._id).select('-__v -is_deleted -createdAt -updatedAt')
+        .populate({
+            path:'subject',
+            select:'name'
+        })
+
+            res.status(200).json({ message:`teacher updated` , data : getTeacher })
+        
 
     }   catch (error) {
         next( new Error("Error : " + error.message) );
@@ -351,7 +365,7 @@ export const deleteTeacher = async ( req, res, next)=>{
             return next(new httpError("Teacher not found",400))
         }
 
-            res.status(202).json({message:`teacher deleted successfully` ,data:deleteOneTeacher})
+            res.status(202).json({message:`teacher deleted successfully` })
 
     }   catch (error) {
         
