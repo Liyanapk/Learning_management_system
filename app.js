@@ -12,11 +12,18 @@ import { dbconnect } from './configs/dbconfig.js';
 import { errorMiddleware, notFound } from './middleware/errorMiddleware.js';
 import { specs } from './swagger.js';
 import swaggerUi from 'swagger-ui-express'
+import cors from 'cors';
 
 
 dotenv.config()
 const app = express()
-const PORT = process.env.PORT || 4001
+app.use(cors({
+    origin: 'http://localhost:3000', // Allow only this origin
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allow specific HTTP methods
+    allowedHeaders: ['Content-Type', 'Authorization'] // Allow specific headers
+  }));
+  
+const PORT = process.env.PORT
 
 dbconnect()
 

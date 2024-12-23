@@ -25,6 +25,8 @@ const router = express.Router();
  *       200:
  *         description: Login successful
  */
+router.post('/', upload.single('pic'), addAdmin);
+
 router.post('/login', adminLogin);
 
 // Middleware for authentication
@@ -53,7 +55,7 @@ router.use(adminAuth);
  *       201:
  *         description: Admin created successfully
  */
-router.post('/', upload.single('pic'), addAdmin);
+
 
 /**
  * @swagger
