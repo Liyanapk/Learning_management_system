@@ -30,6 +30,11 @@ const testStudentSchema = new mongoose.Schema ({
         required: true,
         
     },
+    parent_name:{
+        type: String,
+        required: true,
+
+    },
     parent_number:{
         type: Number,
         required: true,
