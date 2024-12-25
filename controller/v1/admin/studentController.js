@@ -14,7 +14,7 @@ export const addStudent = async ( req, res, next ) => {
 
 
 
-        const {first_name, last_name, email, phone, gender, dob, status, password, batch, parent_number, address} =req.body;
+        const {first_name, last_name, email, phone, gender, dob, status, password, batch,  parent_name, parent_number, address} =req.body;
 
         //age logic
 
@@ -32,7 +32,7 @@ export const addStudent = async ( req, res, next ) => {
 
 
         // all feild required 
-        if (!first_name || !last_name || !email || !dob || !phone || !status || !password || !batch || !gender ||!parent_number ||!address) {
+        if (!first_name || !last_name || !email || !dob || !phone || !status || !password || !batch || !gender || ! parent_name || !parent_number ||!address) {
             return next(new httpError("All credentials are Required!", 400));
         }
 
@@ -104,6 +104,7 @@ export const addStudent = async ( req, res, next ) => {
           batch,
           profile_pic: profilePicturePath,
           age: calculateAge(dob),
+          parent_name,
           parent_number,
           address,
         }); 
@@ -260,7 +261,7 @@ export const updateStudentDetailes = async (req, res, next) =>{
             return next(new httpError("No ID found", 400));
         }
 
-        const { first_name, last_name, email, phone, gender, dob, status, password, batch, parent_number, address } = req.body;
+        const { first_name, last_name, email, phone, gender, dob, status, password, batch,  parent_name, parent_number, address } = req.body;
 
         //age logic
         const calculateAge = (dob) => {
@@ -276,7 +277,7 @@ export const updateStudentDetailes = async (req, res, next) =>{
         };
         
         //updated value
-        const updateData = { first_name, last_name, email, phone, gender, dob, status, batch, parent_number, address};
+        const updateData = { first_name, last_name, email, phone, gender, dob, status, batch,  parent_name, parent_number, address};
 
         //  email
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

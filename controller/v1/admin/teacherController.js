@@ -11,7 +11,7 @@ export const addTeacher = async ( req, res, next ) => {
     try {
 
 
-const {first_name, last_name, dob, email, phone, gender, status, password, subject, address } =req.body
+const { first_name, last_name, dob, email, phone, gender, status, password, subject, address } =req.body
 
     //age logic
 
