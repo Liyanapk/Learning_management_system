@@ -146,7 +146,7 @@ export const listStudent = async( req, res, next) =>{
     try{
         //pagination
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 4;
+        const limit = parseInt(req.query.limit) || 10;
         const skip = (page - 1) * limit;
 
         //filtering
@@ -208,43 +208,43 @@ export const listStudent = async( req, res, next) =>{
 }
 
 
-
-//find by id
-
-export const findStudent = async( req, res, next) =>{
-
+// find by id
+export const findStudent = async (req, res, next) => {
     try {
-        const { id } = req.params;
-
-        if(!id){
-            return next(new httpError("Id not found",400))
-        }
-
-        const student = await Student.findOne( {_id: id ,"is_deleted.status": false });
-
-        const getStudent = await Student.findById(student._id).select('-password -is_deleted -__v -createdAt -updatedAt -__v')
+      const { id } = req.params;
+  
+      // Ensure ID is provided in the request
+      if (!id) {
+        return next(new httpError("Id not found", 400));
+      }
+  
+      // Find student by ID and ensure it's not deleted
+      const student = await Student.findOne({ _id: id, "is_deleted.status": false })
+        .select("-password -is_deleted -__v -createdAt -updatedAt")
         .populate({
-            path:'batch',
-            select:'name status in_charge type status'  })
-            .populate({
-                path:'in_charge',
-                select:'first_name last_name'
-            })
-
-      
-       
-        
-        res.status(200).json( { message:`student founded successfully` , data : getStudent} )
-        
-       
-       
-    }   catch (error) {
-        console.log(error)
-        return next(new httpError("internal server error",500))
+          path: "batch",
+          select: "name status in_charge type",
+        })
+        .populate({
+          path: "in_charge",
+          select: "first_name last_name",
+        });
+  
+      // If no student found, return 404
+      if (!student) {
+        return next(new httpError("Student not found", 404));
+      }
+  
+      res.status(200).json({
+        message: "Student found successfully",
+        data: student,
+      });
+    } catch (error) {
+      console.log(error);
+      return next(new httpError("Internal server error", 500));
     }
-
-}
-
+  };
+  
 
 
 
