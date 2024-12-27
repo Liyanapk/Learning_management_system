@@ -18,10 +18,10 @@ import cors from 'cors';
 dotenv.config()
 const app = express()
 app.use(cors({
-    origin: 'http://localhost:3000', // Allow only this origin
-    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allow specific HTTP methods
-    allowedHeaders: ['Content-Type', 'Authorization'] // Allow specific headers
-  }));
+  origin: 'http://localhost:3000', // Allow only this origin
+  methods: ['GET', 'POST', 'PATCH', 'DELETE'], // Allow specific HTTP methods (including PATCH)
+  allowedHeaders: ['Content-Type', 'Authorization'] // Allow specific headers
+}));
   
 const PORT = process.env.PORT
 
