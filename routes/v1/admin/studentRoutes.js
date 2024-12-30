@@ -9,10 +9,10 @@ const router=express.Router()
 
 router.use(adminAuth)
 
-router.post('/',upload.single('pic'),addStudent)
+router.post('/',upload.single('image'),addStudent)
 router.get('/',listStudent)
 router.get('/:id',findStudent)
-router.patch('/:id',upload.single('pic'),updateStudentDetailes)
+router.patch('/:id',upload.single('image'),updateStudentDetailes)
 router.delete('/:id',deleteStudent)
 
 

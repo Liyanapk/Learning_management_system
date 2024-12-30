@@ -68,11 +68,6 @@ const testStudentSchema = new mongoose.Schema ({
         required : true,
     },
 
-    password : {
-        type : String,
-        required : true,
-    },
-
     batch : {
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'Batch', 

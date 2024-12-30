@@ -14,7 +14,7 @@ export const addStudent = async ( req, res, next ) => {
 
 
 
-        const {first_name, last_name, email, phone, gender, dob, status, password, batch,  parent_name, parent_number, address} =req.body;
+        const {first_name, last_name, email, phone, gender, dob, status, batch,  parent_name, parent_number, address} =req.body;
 
         //age logic
 
@@ -32,7 +32,7 @@ export const addStudent = async ( req, res, next ) => {
 
 
         // all feild required 
-        if (!first_name || !last_name || !email || !dob || !phone || !status || !password || !batch || !gender || ! parent_name || !parent_number ||!address) {
+        if (!first_name || !last_name || !email || !dob || !phone || !status || !batch || !gender || ! parent_name || !parent_number ||!address) {
             return next(new httpError("All credentials are Required!", 400));
         }
 
@@ -44,12 +44,12 @@ export const addStudent = async ( req, res, next ) => {
             return next(new httpError("Invalid email format!", 400));
         }
 
-        //password
+        // //password
 
-        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
-        if (!passwordRegex.test(password)) {
-            return next(new httpError("Password must be at least 8 characters long, include a letter, a number, and a special character.", 400));
-        }
+        // const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
+        // if (!passwordRegex.test(password)) {
+        //     return next(new httpError("Password must be at least 8 characters long, include a letter, a number, and a special character.", 400));
+        // }
 
         //phone 
 
@@ -67,9 +67,9 @@ export const addStudent = async ( req, res, next ) => {
             return next(new httpError("student with this email or phone already exists!", 400));
         }
 
-        //hashed password
+        // //hashed password
 
-        const hashedPassword = await bcrypt.hash(password, parseInt(process.env.SALT_VALUE));
+        // const hashedPassword = await bcrypt.hash(password, parseInt(process.env.SALT_VALUE));
 
         //picture path
         let profilePicturePath;
@@ -100,7 +100,7 @@ export const addStudent = async ( req, res, next ) => {
           dob,
           student_id:studentId,
           status,
-          password: hashedPassword,
+        //   password: hashedPassword,
           batch,
           profile_pic: profilePicturePath,
           age: calculateAge(dob),
@@ -138,7 +138,7 @@ export const addStudent = async ( req, res, next ) => {
 
 
 
-//find
+//list
 
 
 export const listStudent = async( req, res, next) =>{
@@ -146,8 +146,7 @@ export const listStudent = async( req, res, next) =>{
     try{
         //pagination
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
-        const skip = (page - 1) * limit;
+       
 
         //filtering
         const filter = {"is_deleted.status": false};
@@ -177,8 +176,6 @@ export const listStudent = async( req, res, next) =>{
 
         const allStudent = await Student.find(filter)
           .sort(sort)
-          .skip(skip)
-          .limit(limit)
           .select('-password -is_deleted -__v -createdAt -updatedAt -__v')
           .populate({
               path:'batch',
@@ -195,7 +192,7 @@ export const listStudent = async( req, res, next) =>{
         res.status(200).json({
             message: 'Student retrieved successfully',
             data: allStudent,
-            totalPages: Math.ceil(total/limit),
+            
             currentPage: page,
             totalItems: total,
           });
