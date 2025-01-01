@@ -1,6 +1,6 @@
 import express from 'express';
 import { upload } from '../../../middleware/multer/multer.js';
-import { getOneAdmin, addAdmin, listAdmin, updateAdminDetailes, deleteAdmin, adminLogin } from '../../../controller/v1/admin/adminController.js';
+import { getOneAdmin, addAdmin, listAdmin, updateAdminDetailes, deleteManyAdmins, adminLogin } from '../../../controller/v1/admin/adminController.js';
 import { adminAuth } from '../../../middleware/authCheck.js';
 
 const router = express.Router();
@@ -25,7 +25,7 @@ const router = express.Router();
  *       200:
  *         description: Login successful
  */
-router.post('/', upload.single('pic'), addAdmin);
+router.post('/', upload.single('image'), addAdmin);
 
 router.post('/login', adminLogin);
 
@@ -138,7 +138,7 @@ router.patch('/:id', upload.single('pic'), updateAdminDetailes);
  *       404:
  *         description: Admin not found
  */
-router.delete('/:id', deleteAdmin);
+router.delete('/delete', deleteManyAdmins);
 
 export default router;
 
