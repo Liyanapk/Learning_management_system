@@ -60,11 +60,13 @@ const testTeacherSchema = new mongoose.Schema ( {
         required: true,
     },
 
-    subject: {
+    subject: [
+        {
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'Subject', 
         required: true,
-    },
+    }
+],
 
 
     
