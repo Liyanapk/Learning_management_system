@@ -183,33 +183,37 @@ export const updatesubjectDetailes = async (req, res, next) =>{
 
 
 
-export const deleteSubject = async ( req, res, next)=>{
+export const deleteSubjects = async (req, res, next) => {
     try {
-        const { id } = req.params;
-        const deleteOneSubject = await Subject.findOneAndUpdate(
-            { _id: id,"is_deleted.status":false },
-            {
-                $set:{
-                    "is_deleted.status":true,
-                    "is_deleted.deleted_by":req.Admin.id,
-                    "is_deleted.deleted_at":new Date(),
-                }
-            },
-            {new :true}
-        );
-        
-
-        if ( !deleteOneSubject ) {
-
-            return next(new httpError("subject not found",400))
+      const { ids } = req.body; // Expecting an array of IDs
+  
+      if (!Array.isArray(ids) || ids.length === 0) {
+        return next(new httpError("No subject IDs provided", 400));
+      }
+  
+      const deleteResult = await Subject.updateMany(
+        { _id: { $in: ids }, "is_deleted.status": false }, // Match subjects not already deleted
+        {
+          $set: {
+            "is_deleted.status": true,
+            "is_deleted.deleted_by": req.Admin.id,
+            "is_deleted.deleted_at": new Date(),
+          },
         }
-
-            res.status(202).json({message:`subject deleted successfully` })
-
-    }   catch (error) {
-        return next(new httpError("internal server error",500))
+      );
+  
+      if (deleteResult.modifiedCount === 0) {
+        return next(new httpError("No subjects found or already deleted", 404));
+      }
+  
+      res.status(202).json({
+        message: `${deleteResult.modifiedCount} subject(s) deleted successfully`,
+      });
+    } catch (error) {
+      return next(new httpError("Internal server error", 500));
     }
-}
+  };
+  
 
 
 

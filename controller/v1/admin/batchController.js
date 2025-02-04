@@ -141,6 +141,7 @@ export const findBatch = async (req, res, next) => {
       .status(200)
       .json({ message: `batch founded successfully`, data: getBatch });
   } catch (error) {
+    console.log(error)
     return next(new httpError("Internal server error", 500));
   }
 };

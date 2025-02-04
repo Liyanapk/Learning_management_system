@@ -210,8 +210,8 @@ export const listAdmin = async (req, res, next) => {
   }
 };
 
-//find by id
 
+//find by id
 export const getOneAdmin = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -219,27 +219,29 @@ export const getOneAdmin = async (req, res, next) => {
     if (!id) {
       return next(new httpError("Error finding admin", 400));
     }
-    //not show soft deleted
-    const admin = await Admin.findOne({ _id: id, "is_deleted.status": false });
 
-    const getAdmin = await Admin.findById(admin._id).select(
-      "-__v -createdAt -updatedAt -is_deleted -password"
-    );
+    // Fetch the admin, checking if the account is not soft deleted
+    const admin = await Admin.findOne({ 
+      _id: id, 
+      "is_deleted.status": false 
+    }).select("-__v -createdAt -updatedAt -is_deleted -password");
 
     if (!admin) {
-      return next(new httpError("Admin not present!", 402));
-    } else {
-      res.status(200).json({
-        status: true,
-        message: `admin is found`,
-        data: getAdmin,
-        access_token: null,
-      });
+      return next(new httpError("Admin not found!", 404));
     }
+
+    // If the admin is found, return the response with admin data
+    res.status(200).json({
+      status: true,
+      message: "Admin is found",
+      data: admin,
+      access_token: null,
+    });
   } catch (error) {
     return next(new httpError("Internal Server Error", 500));
   }
 };
+
 
 //findOneAddUpdate
 
