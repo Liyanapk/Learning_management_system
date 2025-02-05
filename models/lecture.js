@@ -11,12 +11,12 @@ const testLectureSchema = new  mongoose.Schema( {
 
     },
 
-    link: {
+    // link: {
       
-            live: {type: String, default: null},
-            recorded: {type: String, default: null}
+    //         live: {type: String, default: null},
+    //         recorded: {type: String, default: null}
 
-    },
+    // },
 
     status: {
         type: String,
