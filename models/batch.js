@@ -57,14 +57,7 @@ is_deleted: {
         default: null
     },
 
-},
-
-classroom_link: {
-    type: String,
-    unique: true,
-  },
-  
-  
+}
 
 }, {
 

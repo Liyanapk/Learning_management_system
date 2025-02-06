@@ -2,26 +2,22 @@ import Batch from "../../../models/batch.js";
 import httpError from "../../../utils/httpError.js";
 import mongoose from "mongoose";
 
-
-
-
 //add batch
 
 export const addBatch = async (req, res, next) => {
   try {
     const { name, in_charge, type, status, duration } = req.body;
 
-    //  Classroom Auth Link
-    const classroomLink = `http://localhost:5000/api/v1/google/auth`;
-
+    //required
     if (!name || !in_charge || !type || !status || !duration) {
       return next(new httpError("All credentials are required", 400));
     }
 
     if (!duration.from || !duration.to) {
-      return next(new httpError("Both date fields are required", 403));
+      return next(new httpError("both date feild required", 403));
     }
 
+    //duration logic
     const from = new Date(duration.from);
     const to = new Date(duration.to);
 
@@ -30,42 +26,36 @@ export const addBatch = async (req, res, next) => {
     }
 
     if (to < from) {
-      return next(new httpError("Date must be after 'from' date", 402));
+      return next(new httpError("Date must be after 'from' date ", 402));
     }
 
+    //exist batch
     const batchExists = await Batch.findOne({ name });
+
     if (batchExists) {
-      return next(new httpError("Batch name already exists!", 404));
+      return next(new httpError("Batch name already exsist!", 404));
     }
 
-    const newBatch = new Batch({
-      name,
-      in_charge,
-      type,
-      status,
-      duration,
-      classroom_link: classroomLink,
-    });
+    //create new batch
+    const newBatch = new Batch({ name, in_charge, type, status, duration });
 
     await newBatch.save();
 
     const getBatch = await Batch.findById(newBatch._id).select(
       "-__v -createdAt -updatedAt -is_deleted"
     );
-
     res.status(201).json({
       status: true,
-      message: "Batch created successfully",
+      message: "batch created successfully",
       data: getBatch,
-      classroom_link: classroomLink, 
+      access_token: null,
     });
   } catch (error) {
-    console.log("Error:", error);
+    console.log("error is :", error);
+
     return next(new httpError("Error creating batch", 500));
   }
 };
-
-
 
 //FIND BATCH
 
@@ -73,7 +63,7 @@ export const listBatch = async (req, res, next) => {
   try {
     //pagination
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 4;
+    const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
     //filtering
