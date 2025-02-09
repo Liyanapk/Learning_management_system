@@ -1,6 +1,7 @@
 import Course from "../../../models/course.js"
 import Teacher from "../../../models/teacher.js"
 import httpError from "../../../utils/httpError.js"
+import Stripe from "stripe";
 
 export const courseAdd = async( req, res, next )=>{
 
@@ -96,8 +97,72 @@ export  const allCourse = async(req, res, next)=>{
 
 export const oneCourse = async(req, res, next)=>{
     try {
+         const { id } = req.params
+         if(! id){
+            return next (new httpError("Id required !"),400)
+         }
+
+         const getCourse = await Course.findById( { _id :id })
+
+         res.status(200).json({
+            status:true,
+            message :"Course fetched Successfully",
+            data: getCourse,
+            access_token: null
+
+         })
         
     } catch (error) {
+        console.log(error);
         
     }
 }
+
+
+
+
+//stripe integration 
+
+export const checkOutSession = async(req, res, next)=>{
+
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+    try {
+
+        const { courseId } = req.body
+
+        if(! courseId){
+            return next(new httpError("courde id not find"),400)
+        }
+
+        const findCourse = await Course.findById({ _id:courseId })
+
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types:["card"],
+            line_items : [
+                {
+                    price_data : {
+                        currency : 'usd',
+                        product_data:{
+                            name : findCourse.title,
+                            description : findCourse.description
+                        },
+                        unit_amount : Math.round(findCourse.disccountprice*100)
+                    },
+                    quantity:1
+                }
+            ],
+            mode:'payment',
+            success_url: `${process.env.FRONTEND_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${process.env.FRONTEND_URL}/cancel`,
+            
+
+        })
+        res.status(200).json({ url: session.url })
+        
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+
+

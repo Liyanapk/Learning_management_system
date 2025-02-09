@@ -4,29 +4,15 @@ import mongoose from "mongoose";
 
 //add batch
 
+// if a course added to a batch do not show that batch and course while listing all course and batch
+
 export const addBatch = async (req, res, next) => {
   try {
-    const { name, in_charge, type, status, duration } = req.body;
+    const { name, in_charge, course, students } = req.body;
 
     //required
-    if (!name || !in_charge || !type || !status || !duration) {
+    if (!name || !in_charge || !course || !students ) {
       return next(new httpError("All credentials are required", 400));
-    }
-
-    if (!duration.from || !duration.to) {
-      return next(new httpError("both date feild required", 403));
-    }
-
-    //duration logic
-    const from = new Date(duration.from);
-    const to = new Date(duration.to);
-
-    if (from < new Date().setHours(0, 0, 0, 0)) {
-      return next(new httpError("Date must be a valid date", 401));
-    }
-
-    if (to < from) {
-      return next(new httpError("Date must be after 'from' date ", 402));
     }
 
     //exist batch
@@ -37,7 +23,7 @@ export const addBatch = async (req, res, next) => {
     }
 
     //create new batch
-    const newBatch = new Batch({ name, in_charge, type, status, duration });
+    const newBatch = new Batch({ name, in_charge, course, students });
 
     await newBatch.save();
 
@@ -132,8 +118,13 @@ export const findBatch = async (req, res, next) => {
         path: "in_charge",
         select: " first_name last_name email status profile_image",
         populate: {
-          path: "subject",
-          select: "name",
+          path: "course",
+          select: "startDate endDate",
+        },
+        populate:{
+          path:"students",
+          select:"first_name last_name"
+
         },
       });
 
@@ -176,16 +167,19 @@ export const updateBatchDetailes = async (req, res, next) => {
 
     const getOneBatch = await Batch.findById(updateBatch._id)
       .select("-password -is_deleted -__v -createdAt -updatedAt")
-      .populate([
-        {
-          path: "in_charge",
-          select: "first_name last_name email status subject profile_image",
-          populate: {
-            path: "subject",
-            select: "name",
-          },
+      .populate({
+        path: "in_charge",
+        select: " first_name last_name email status profile_image",
+        populate: {
+          path: "course",
+          select: "startDate endDate",
         },
-      ]);
+        populate:{
+          path:"students",
+          select:"first_name last_name"
+
+        },
+      });
 
     res
       .status(200)

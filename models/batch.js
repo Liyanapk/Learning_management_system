@@ -15,29 +15,17 @@ in_charge: {
     required: true
 
 },
-type:{
-    type :String,
-    enum:['free','paid','crash course'],
-    required: true,
-},
-status:{
-    type :String,
-    enum:['draft','inprogress','completed'],
-    required: true,
+course:{
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Course',                
+    required: true
 },
 
-    duration: {
-        from: { 
-          type: Date, 
-          required: true 
-        },
-        to: { 
-          type: Date, 
-          required: true 
-        }
-      },
-
-
+students:[{
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Student',                
+    
+}],
 
 is_deleted: {
 
