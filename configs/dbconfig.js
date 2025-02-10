@@ -3,8 +3,6 @@
 import mongoose from 'mongoose'
 
 
-
-
 export const dbconnect = async()=>{
     
     try {
@@ -18,4 +16,6 @@ export const dbconnect = async()=>{
         process.exit(1)
         
     }
+    console.log(process.env.MONGO_URL);
+
 }
