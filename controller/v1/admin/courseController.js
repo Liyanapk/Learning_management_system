@@ -1,3 +1,4 @@
+import Batch from "../../../models/batch.js";
 import Course from "../../../models/course.js"
 import Teacher from "../../../models/teacher.js"
 import httpError from "../../../utils/httpError.js"
@@ -135,7 +136,7 @@ export const checkOutSession = async(req, res, next)=>{
         }
 
         const findCourse = await Course.findById({ _id:courseId })
-
+        
         const session = await stripe.checkout.sessions.create({
             payment_method_types:["card"],
             line_items : [
@@ -155,14 +156,71 @@ export const checkOutSession = async(req, res, next)=>{
             success_url: `${process.env.FRONTEND_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${process.env.FRONTEND_URL}/cancel`,
             
-
+            metadata: {
+                courseId: courseId,
+                studentId: req.user.id  
+            },
         })
-        res.status(200).json({ url: session.url })
+        res.status(200).json({ url: session.url  })
         
     } catch (error) {
         console.log(error)
     }
 }
 
+
+//webhook
+
+
+
+export const handleWebhook = async (req, res) => {
+    const sig = req.headers["stripe-signature"];
+    let event;
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+    try {
+        event = stripe.webhooks.constructEvent(req.body, sig, process.env.WEBHOOK_SECRET);
+    } catch (err) {
+        console.error("Webhook signature verification failed:", err.message);
+        return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    if (event.type === "checkout.session.completed") {
+        const session = event.data.object;
+
+        if (!session.metadata || !session.metadata.courseId || !session.metadata.studentId) {
+            console.error("Missing metadata in session");
+            return res.status(400).json({ error: "Missing courseId or studentId" });
+        }
+
+        const { courseId, studentId } = session.metadata;
+
+        try {
+            // Find the batch corresponding to the course
+            const batch = await Batch.findOne({ course: courseId });
+
+            if (!batch) {
+                console.error("No batch found for this course");
+                return res.status(404).json({ error: "Batch not found" });
+            }
+
+            // Add student to batch if not already added
+            if (!batch.students.includes(studentId)) {
+                batch.students.push(studentId);
+                await batch.save();
+                console.log(`Student ${studentId} added to batch ${batch._id}`);
+            } else {
+                console.log(`Student ${studentId} is already in batch ${batch._id}`);
+            }
+
+            return res.status(200).json({ received: true });
+        } catch (err) {
+            console.error("Error updating batch:", err);
+            return res.status(500).json({ error: "Failed to update batch" });
+        }
+    }
+
+    res.status(200).json({ received: true });
+};
 
 
