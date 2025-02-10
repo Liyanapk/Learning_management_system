@@ -3,6 +3,10 @@ import bcrypt from "bcrypt";
 import httpError from "../../../utils/httpError.js";
 import mongoose from "mongoose";
 
+
+
+
+
 //create student
 
 export const addStudent = async (req, res, next) => {
@@ -15,10 +19,10 @@ export const addStudent = async (req, res, next) => {
       gender,
       dob,
       status,
-      batch,
       parent_name,
       parent_number,
       address,
+      password, 
     } = req.body;
 
     //age logic
@@ -46,11 +50,11 @@ export const addStudent = async (req, res, next) => {
       !dob ||
       !phone ||
       !status ||
-      !batch ||
       !gender ||
       !parent_name ||
       !parent_number ||
-      !address
+      !address ||
+      !password
     ) {
       return next(new httpError("All credentials are Required!", 400));
     }
@@ -64,10 +68,10 @@ export const addStudent = async (req, res, next) => {
 
     // //password
 
-    // const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
-    // if (!passwordRegex.test(password)) {
-    //     return next(new httpError("Password must be at least 8 characters long, include a letter, a number, and a special character.", 400));
-    // }
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
+    if (!passwordRegex.test(password)) {
+        return next(new httpError("Password must be at least 8 characters long, include a letter, a number, and a special character.", 400));
+    }
 
     //phone
 
@@ -91,7 +95,7 @@ export const addStudent = async (req, res, next) => {
 
     // //hashed password
 
-    // const hashedPassword = await bcrypt.hash(password, parseInt(process.env.SALT_VALUE));
+    const hashedPassword = await bcrypt.hash(password, parseInt(process.env.SALT_VALUE));
 
     //picture path
     let profilePicturePath;
@@ -124,12 +128,13 @@ export const addStudent = async (req, res, next) => {
       student_id: studentId,
       status,
       //   password: hashedPassword,
-      batch,
+    
       profile_pic: profilePicturePath,
       age: calculateAge(dob),
       parent_name,
       parent_number,
       address,
+      password: hashedPassword,
     });
 
     await newStudent.save();
@@ -137,12 +142,8 @@ export const addStudent = async (req, res, next) => {
     const getStudent = await Student.findById(newStudent._id)
       .select("-__v -is_deleted -createdAt -updatedAt")
       .populate({
-        path: "batch",
-        select: "name status in_charge type status",
-        populate: {
           path: "in_charge",
           select: "first_name last_name",
-        },
       });
     res
       .status(201)
@@ -185,12 +186,8 @@ export const listStudent = async (req, res, next) => {
       .sort(sort)
       .select("-password -is_deleted -__v -createdAt -updatedAt -__v")
       .populate({
-        path: "batch",
-        select: "name status in_charge type status",
-        populate: {
           path: "in_charge",
           select: "first_name last_name",
-        },
       });
 
     //response send
@@ -222,10 +219,6 @@ export const findStudent = async (req, res, next) => {
       "is_deleted.status": false,
     })
       .select("-password -is_deleted -__v -createdAt -updatedAt")
-      .populate({
-        path: "batch",
-        select: "name status in_charge type",
-      })
       .populate({
         path: "in_charge",
         select: "first_name last_name",
@@ -265,7 +258,6 @@ export const updateStudentDetailes = async (req, res, next) => {
       dob,
       status,
       password,
-      batch,
       parent_name,
       parent_number,
       address,
@@ -296,7 +288,6 @@ export const updateStudentDetailes = async (req, res, next) => {
       gender,
       dob,
       status,
-      batch,
       parent_name,
       parent_number,
       address,
@@ -370,12 +361,9 @@ export const updateStudentDetailes = async (req, res, next) => {
     const getUpdatedStudent = await Student.findById(updateStudent._id)
       .select("-password -is_deleted -__v -createdAt -updatedAt -__v")
       .populate({
-        path: "batch",
-        select: "name status in_charge type status",
-        populate: {
           path: "in_charge",
           select: "first_name last_name",
-        },
+       
       });
 
     if (!updateStudent) {

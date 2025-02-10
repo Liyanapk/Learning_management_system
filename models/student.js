@@ -68,11 +68,7 @@ const testStudentSchema = new mongoose.Schema ({
         required : true,
     },
 
-    batch : {
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: 'Batch', 
-        required: true,
-    },
+    
     address:{
         type : String,
         required : true,
@@ -82,7 +78,10 @@ const testStudentSchema = new mongoose.Schema ({
      type: mongoose.Schema.Types.ObjectId,
          ref: 'Teacher'
          },
-
+         password: {
+            type: String,
+            required: true,
+        },        
 
     is_deleted: {
 

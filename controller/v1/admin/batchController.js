@@ -8,10 +8,10 @@ import mongoose from "mongoose";
 
 export const addBatch = async (req, res, next) => {
   try {
-    const { name, in_charge, course, students } = req.body;
+    const { name, in_charge, course } = req.body;
 
     //required
-    if (!name || !in_charge || !course || !students ) {
+    if (!name || !in_charge || !course  ) {
       return next(new httpError("All credentials are required", 400));
     }
 
@@ -23,7 +23,7 @@ export const addBatch = async (req, res, next) => {
     }
 
     //create new batch
-    const newBatch = new Batch({ name, in_charge, course, students });
+    const newBatch = new Batch({ name, in_charge, course });
 
     await newBatch.save();
 
