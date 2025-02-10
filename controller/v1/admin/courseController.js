@@ -135,7 +135,7 @@ export const checkOutSession = async(req, res, next)=>{
             return next(new httpError("courde id not find"),400)
         }
 
-        const findCourse = await Course.findById({ _id:courseId })
+        const findCourse = await Course.findById({ course :courseId })
         
         const session = await stripe.checkout.sessions.create({
             payment_method_types:["card"],
@@ -212,8 +212,12 @@ export const handleWebhook = async (req, res) => {
             } else {
                 console.log(`Student ${studentId} is already in batch ${batch._id}`);
             }
+            console.log("Received Webhook Event:", event);
+            console.log("Session Metadata:", session.metadata);
 
             return res.status(200).json({ received: true });
+   
+
         } catch (err) {
             console.error("Error updating batch:", err);
             return res.status(500).json({ error: "Failed to update batch" });
