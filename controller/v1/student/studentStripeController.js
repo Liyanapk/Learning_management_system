@@ -12,7 +12,7 @@ export const checkOutSession = async (req, res, next) => {
     const { courseId } = req.body;
 
     if (!courseId) {
-      return next(new httpError("courde id not find"), 400);
+      return next(new httpError("course id not find"), 400);
     }
 
     const findCourse = await Course.findById({ _id: courseId });

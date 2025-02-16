@@ -29,8 +29,15 @@ app.use(cors({
   
 const PORT = process.env.PORT
 
-dbconnect()
 
+dbconnect()
+app.use((req, res, next) => {
+  if (req.originalUrl === '/api/v1/studentStripe') {
+    next();
+  } else {
+    express.json()(req, res, next);
+  }
+});
 
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
@@ -52,7 +59,7 @@ app.use('/api/v1/studentStripe', express.raw({ type: 'application/json' }), stud
 app.use(notFound)
 app.use(errorMiddleware)
 
-app.use (express.json())
+
   
 
 

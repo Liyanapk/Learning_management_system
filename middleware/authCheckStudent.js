@@ -6,7 +6,7 @@ export const studentAuth = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    if (!authHeader || !authHeader.startsWith("Bearer")) {
       return next(new httpError("Authentication token required", 401));
     }
 
