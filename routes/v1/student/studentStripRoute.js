@@ -8,6 +8,7 @@ const router=express.Router()
 router.post("/stripe/webhook", express.raw({ type: 'application/json' }), handleWebhook);
 
 router.use( studentAuth )
+
 router.post('/stripe', checkOutSession)
 
 

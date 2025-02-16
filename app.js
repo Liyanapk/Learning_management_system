@@ -31,13 +31,7 @@ const PORT = process.env.PORT
 
 
 dbconnect()
-app.use((req, res, next) => {
-  if (req.originalUrl === '/api/v1/studentStripe') {
-    next();
-  } else {
-    express.json()(req, res, next);
-  }
-});
+app.use (express.json())
 
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
