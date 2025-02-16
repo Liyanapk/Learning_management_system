@@ -31,8 +31,7 @@ const PORT = process.env.PORT
 
 
 dbconnect()
-
-
+app.use (express.json())
 
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
@@ -54,7 +53,7 @@ app.use('/api/v1/studentStripe', express.raw({ type: 'application/json' }), stud
 app.use(notFound)
 app.use(errorMiddleware)
 
-app.use (express.json())
+
   
 
 
