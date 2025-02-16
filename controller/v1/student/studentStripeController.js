@@ -12,7 +12,7 @@ export const checkOutSession = async (req, res, next) => {
     const { courseId } = req.body;
 
     if (!courseId) {
-      return next(new httpError("courde id not find"), 400);
+      return next(new httpError("course id not find"), 400);
     }
 
     const findCourse = await Course.findById({ _id: courseId });
@@ -53,7 +53,7 @@ export const checkOutSession = async (req, res, next) => {
 export const handleWebhook = async (req, res) => {
   const sig = req.headers["stripe-signature"];
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-
+console.log("session start")
   try {
     const event = stripe.webhooks.constructEvent(
       req.body,
