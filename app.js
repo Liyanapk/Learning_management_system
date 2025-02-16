@@ -31,8 +31,8 @@ const PORT = process.env.PORT
 
 
 dbconnect()
-app.use (express.json())
-app.use('/api/v1/studentStripe', express.raw({ type: 'application/json' }));
+
+
 
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
@@ -50,11 +50,11 @@ app.use('/api/v1/assignment',assignmentrouter)
 app.use('/api/v1/teacherControll',teacherControrouter)
 app.use('/api/v1/course',courserouter)
 app.use('/api/v1/studentProfile',studentprofilerouter)
-app.use('/api/v1/studentStripe', studentstriperouter)
+app.use('/api/v1/studentStripe', express.raw({ type: 'application/json' }), studentstriperouter)
 app.use(notFound)
 app.use(errorMiddleware)
 
-
+app.use (express.json())
   
 
 
