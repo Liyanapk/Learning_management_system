@@ -32,6 +32,13 @@ const PORT = process.env.PORT
 
 dbconnect()
 
+app.use((req, res, next) => {
+  if (req.originalUrl === '/api/v1/studentStripe') {
+    next(); // Skip JSON parsing for this route
+  } else {
+    express.json()(req, res, next);
+  }
+});
 
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
@@ -55,7 +62,7 @@ app.use(errorMiddleware)
 
 
   
-app.use (express.json())
+
 
 
 app.listen (PORT, ()=>{
